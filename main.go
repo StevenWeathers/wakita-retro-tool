@@ -1,0 +1,106 @@
+package main
+
+import (
+	_ "embed"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/StevenWeathers/wakita-retro-tool/lib/database"
+	"github.com/StevenWeathers/wakita-retro-tool/lib/email"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
+	"github.com/spf13/viper"
+)
+
+//go:embed schema.sql
+var schemaSQL string
+var (
+	version = "dev"
+)
+
+// ServerConfig holds server global config values
+type ServerConfig struct {
+	// port the application server will listen on
+	ListenPort string
+	// the domain of the application for cookie securing
+	AppDomain string
+	// name of the frontend cookie
+	FrontendCookieName string
+	// name of the user cookie
+	SecureCookieName string
+	// controls whether or not the cookie is set to secure, only works over HTTPS
+	SecureCookieFlag bool
+	// email to promote a user to ADMIN on app startup
+	// the user should already be registered for this to work
+	AdminEmail string
+	// Whether or not to enable google analytics tracking
+	AnalyticsEnabled bool
+	// ID used for google analytics
+	AnalyticsID string
+	// the app version
+	Version string
+	// Which avatar service is utilized
+	AvatarService string
+	// PathPrefix allows the application to be run on a shared domain
+	PathPrefix string
+}
+
+type server struct {
+	config   *ServerConfig
+	router   *mux.Router
+	email    *email.Email
+	cookie   *securecookie.SecureCookie
+	database *database.Database
+}
+
+func main() {
+	log.Println("Wakita version " + version)
+
+	InitConfig()
+
+	cookieHashkey := viper.GetString("http.cookie_hashkey")
+	pathPrefix := viper.GetString("http.path_prefix")
+	router := mux.NewRouter()
+
+	if pathPrefix != "" {
+		router = router.PathPrefix(pathPrefix).Subrouter()
+	}
+
+	s := &server{
+		config: &ServerConfig{
+			ListenPort:         viper.GetString("http.port"),
+			AppDomain:          viper.GetString("http.domain"),
+			AdminEmail:         viper.GetString("admin.email"),
+			FrontendCookieName: viper.GetString("http.frontend_cookie_name"),
+			SecureCookieName:   viper.GetString("http.backend_cookie_name"),
+			SecureCookieFlag:   viper.GetBool("http.secure_cookie"),
+			AnalyticsEnabled:   viper.GetBool("analytics.enabled"),
+			AnalyticsID:        viper.GetString("analytics.id"),
+			Version:            version,
+			AvatarService:      viper.GetString(("config.avatar_service")),
+			PathPrefix:         pathPrefix,
+		},
+		router: router,
+		cookie: securecookie.New([]byte(cookieHashkey), nil),
+	}
+	s.email = email.New(s.config.AppDomain, s.config.PathPrefix)
+	s.database = database.New(s.config.AdminEmail, schemaSQL)
+
+	go h.run()
+
+	s.routes()
+
+	srv := &http.Server{
+		Handler: s.router,
+		Addr:    fmt.Sprintf(":%s", s.config.ListenPort),
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Println("Access the WebUI via 127.0.0.1:" + s.config.ListenPort)
+
+	log.Fatal(srv.ListenAndServe())
+}

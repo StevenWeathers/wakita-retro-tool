@@ -1,0 +1,51 @@
+version: '3.1'
+
+services:
+  wakita:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - asgard
+    environment:
+      APP_DOMAIN: ".127.0.0.1"
+      COOKIE_SECURE: "false"
+      SMTP_SECURE: "false"
+      SMTP_HOST: mail
+      DB_NAME: wakita
+      DB_USER: thor
+      DB_PASS: odinson
+  db: 
+    image: postgres:13.2
+    restart: always
+    environment:
+      POSTGRES_DB: wakita
+      POSTGRES_USER: thor
+      POSTGRES_PASSWORD: odinson
+    ports:
+      - 5432:5432
+    volumes:
+      - wakita_data:/var/lib/postgresql/data
+    networks:
+      - asgard
+  mail:
+    image: djfarrelly/maildev:1.1.0
+    restart: always
+    ports:
+      - 1080:80
+      - 1025:25
+    networks:
+      - asgard
+
+networks:
+ asgard:
+
+volumes:
+  wakita_data:
