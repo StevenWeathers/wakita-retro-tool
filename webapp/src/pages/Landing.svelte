@@ -22,7 +22,7 @@
     }
 </style>
 
-<section class="bg-exo-red text-exo-grey">
+<section class="bg-brand-color">
     <div class="container mx-auto px-4 py-6 lg:py-10">
         <div class="flex flex-wrap items-center -mx-4">
             <div class="w-full md:w-1/2 mb-4 lg:mb-0 px-4 text-white">
@@ -54,7 +54,7 @@
                         class="w-full text-xl md:w-auto inline-block
                         no-underline bg-transparent bg-white
                         hover:bg-transparent hover:text-white font-semibold
-                        text-exo-red py-4 px-10 border hover:border-white
+                        text-brand-color py-4 px-10 border hover:border-white
                         border-transparent rounded"
                         href="{$user.id ? appRoutes.retrospectives : appRoutes.register}">
                         Create a Retrospective

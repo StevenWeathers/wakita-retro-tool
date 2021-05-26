@@ -26,7 +26,7 @@ RUN apk update && apk add --no-cache git ca-certificates
 # Create appuser
 RUN adduser -D -g '' appuser
 # Copy the go source
-COPY ./pkg/ $GOPATH/src/github.com/stevenweathers/wakita-retro-tool/pkg/
+COPY ./lib/ $GOPATH/src/github.com/stevenweathers/wakita-retro-tool/lib/
 COPY ./*.go $GOPATH/src/github.com/stevenweathers/wakita-retro-tool/
 COPY ./go.mod $GOPATH/src/github.com/stevenweathers/wakita-retro-tool/
 COPY ./go.sum $GOPATH/src/github.com/stevenweathers/wakita-retro-tool/

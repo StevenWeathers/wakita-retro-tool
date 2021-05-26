@@ -36,7 +36,7 @@
 
     const { AllowRegistration, AppVersion, PathPrefix } = appConfig
     const footerLinkClasses =
-        'no-underline text-orange-500 hover:text-orange-800'
+        'no-underline text-blue-500 hover:text-blue-800'
 
     let notifications
 
@@ -214,20 +214,14 @@
     :global(.nav-logo) {
         max-height: 3.75rem;
     }
-    :global(.text-exo-red) {
-        color: #a70b0f;
+    :global(.text-brand-color) {
+        color: #1c90abff;
     }
-    :global(.border-exo-red) {
-        border-color: #a70b0f;
+    :global(.border-brand-color) {
+        border-color: #1c90abff;
     }
-    :global(.bg-exo-red) {
-        background-color: #a70b0f;
-    }
-    :global(.text-exo-grey) {
-        color: #2c2d2c;
-    }
-    :global(.bg-exo-grey) {
-        background-color: #2c2d2c;
+    :global(.bg-brand-color) {
+        background-color: #1c90abff;
     }
 </style>
 
@@ -237,7 +231,7 @@
     <GlobalAlerts registered="{!!activeUser.name}" />
 
     <nav
-        class="flex items-center justify-between flex-wrap bg-exo-grey px-6 py-2"
+        class="flex items-center justify-between flex-wrap px-6 py-2 bg-white"
         role="navigation"
         aria-label="main navigation">
         <div class="flex items-center flex-shrink-0 mr-6">
@@ -255,7 +249,7 @@
                     <a href="{appRoutes.profile}">{activeUser.name}</a>
                 </span>
                 <HollowButton
-                    color="orange"
+                    color="teal"
                     href="{appRoutes.retrospectives}"
                     additionalClasses="mr-2">
                     My Retro's
