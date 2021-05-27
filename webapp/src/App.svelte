@@ -244,7 +244,7 @@
         </div>
         <div class="text-right mt-4 md:mt-0">
             {#if activeUser.name}
-                <span class="font-bold mr-2 text-xl text-white">
+                <span class="font-bold mr-2 text-xl">
                     <UserIcon />
                     <a href="{appRoutes.profile}">{activeUser.name}</a>
                 </span>
