@@ -12,11 +12,18 @@ import (
 func (s *server) handleAppStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		AppStats, err := s.database.GetAppStats()
-
 		if err != nil {
 			http.NotFound(w, r)
 			return
 		}
+
+		ActiveRetroUserCount := 0
+		for _, s := range h.arenas {
+			ActiveRetroUserCount = ActiveRetroUserCount + len(s)
+		}
+
+		AppStats.ActiveRetroCount = len(h.arenas)
+		AppStats.ActiveRetroUserCount = ActiveRetroUserCount
 
 		s.respondWithJSON(w, http.StatusOK, AppStats)
 	}

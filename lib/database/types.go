@@ -90,13 +90,15 @@ type APIKey struct {
 
 // ApplicationStats includes user, retrospective counts
 type ApplicationStats struct {
-	RegisteredCount    int `json:"registeredUserCount"`
-	UnregisteredCount  int `json:"unregisteredUserCount"`
-	RetrospectiveCount int `json:"retrospectiveCount"`
-	OrganizationCount  int `json:"organizationCount"`
-	DepartmentCount    int `json:"departmentCount"`
-	TeamCount          int `json:"teamCount"`
-	APIKeyCount        int `json:"apikeyCount"`
+	RegisteredCount      int `json:"registeredUserCount"`
+	UnregisteredCount    int `json:"unregisteredUserCount"`
+	RetrospectiveCount   int `json:"retrospectiveCount"`
+	OrganizationCount    int `json:"organizationCount"`
+	DepartmentCount      int `json:"departmentCount"`
+	TeamCount            int `json:"teamCount"`
+	APIKeyCount          int `json:"apikeyCount"`
+	ActiveRetroCount     int `json:"activeRetroCount"`
+	ActiveRetroUserCount int `json:"activeRetroUserCount"`
 }
 
 // Organization can be a company

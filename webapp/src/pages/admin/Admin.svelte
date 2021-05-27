@@ -26,6 +26,8 @@
         departmentCount: 0,
         teamCount: 0,
         apikeyCount: 0,
+        activeRetroCount: 0,
+        activeRetroUserCount: 0
     }
 
     function getAppStats() {
@@ -86,6 +88,18 @@
             <div
                 class="flex flex-wrap items-center text-center pt-2 pb-2 md:pt-4
                 md:pb-4 bg-white shadow-lg rounded text-xl">
+                <div class="w-1/2">
+                    <div class="mb-2 font-bold">Active Retrospectives</div>
+                    {appStats.activeRetroCount}
+                </div>
+                <div class="w-1/2">
+                    <div class="mb-2 font-bold">Active Retrospective Users</div>
+                    {appStats.activeRetroUserCount}
+                </div>
+            </div>
+            <div
+                class="flex flex-wrap items-center text-center pt-2 pb-2 md:pt-4
+                md:pb-4 bg-white shadow-lg rounded text-xl">
                 <div class="w-1/3">
                     <div class="mb-2 font-bold">Unregistered Users</div>
                     {appStats.unregisteredUserCount}
@@ -102,24 +116,24 @@
             <div
                 class="flex flex-wrap items-center text-center pt-2 pb-2 md:pt-4
                 md:pb-4 bg-white shadow-lg rounded text-xl">
-                <div class="w-1/4">
+                <div class="{APIEnabled ? 'w-1/4' : 'w-1/3'}">
                     <div class="mb-2 font-bold">Organizations</div>
                     {appStats.organizationCount}
                 </div>
-                <div class="w-1/4">
+                <div class="{APIEnabled ? 'w-1/4' : 'w-1/3'}">
                     <div class="mb-2 font-bold">Departments</div>
                     {appStats.departmentCount}
                 </div>
-                <div class="w-1/4">
+                <div class="{APIEnabled ? 'w-1/4' : 'w-1/3'}">
                     <div class="mb-2 font-bold">Teams</div>
                     {appStats.teamCount}
                 </div>
+                {#if APIEnabled}
                 <div class="w-1/4">
-                    {#if APIEnabled}
-                        <div class="mb-2 font-bold">API Keys</div>
-                        {appStats.apikeyCount}
-                    {/if}
+                    <div class="mb-2 font-bold">API Keys</div>
+                    {appStats.apikeyCount}
                 </div>
+                {/if}
             </div>
         </div>
     </div>
