@@ -204,6 +204,12 @@ npm run build
 go build
 ```
 
+## Running with Watch (uses webapp dist files on OS instead of embedded)
+```
+npm run autobuild
+make dev-go
+```
+
 # Run Locally
 
 Run the server and visit [http://localhost:8080](http://localhost:8080)
