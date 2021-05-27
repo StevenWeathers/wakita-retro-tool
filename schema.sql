@@ -40,6 +40,27 @@ CREATE TABLE IF NOT EXISTS retrospective_user (
     CONSTRAINT ru_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS retrospective_item (
+    id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    retrospective_id UUID REFERENCES retrospective NOT NULL,
+    user_id UUID REFERENCES users NOT NULL,
+    parent_id UUID REFERENCES retrospective_item,
+    content TEXT NOT NULL,
+    votes JSONB DEFAULT '[]'::JSONB,
+    type VARCHAR(16) NOT NULL,
+    CONSTRAINT ri_retrospective_id_fkey FOREIGN KEY (retrospective_id) REFERENCES retrospective(id) ON DELETE CASCADE,
+    CONSTRAINT ri_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT ri_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES retrospective_item ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS retrospective_action (
+    id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    retrospective_id UUID REFERENCES retrospective NOT NULL,
+    content TEXT NOT NULL,
+    completed BOOL DEFAULT false,
+    CONSTRAINT ra_retrospective_id_fkey FOREIGN KEY (retrospective_id) REFERENCES retrospective(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS user_reset (
     reset_id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES users NOT NULL,
