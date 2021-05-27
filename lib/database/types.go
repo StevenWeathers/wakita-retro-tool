@@ -36,10 +36,31 @@ type RetrospectiveUser struct {
 
 // Retrospective A story mapping board
 type Retrospective struct {
-	RetrospectiveID   string               `json:"id"`
-	OwnerID           string               `json:"owner_id"`
-	RetrospectiveName string               `json:"name"`
-	Users             []*RetrospectiveUser `json:"users"`
+	RetrospectiveID   string                 `json:"id"`
+	OwnerID           string                 `json:"owner_id"`
+	RetrospectiveName string                 `json:"name"`
+	Users             []*RetrospectiveUser   `json:"users"`
+	Items             []*RetrospectiveItem   `json:"items"`
+	Actions           []*RetrospectiveAction `json:"actions"`
+}
+
+// RetrospectiveItem can be a pro (went well/worked), con (needs improvement), or a question
+type RetrospectiveItem struct {
+	ID              string   `json:"id" db:"id"`
+	RetrospectiveID string   `json:"retrospectiveId" db:"retrospective_id"`
+	UserID          string   `json:"userId" db:"user_id"`
+	ParentID        string   `json:"parentId" db:"parent_id"`
+	Content         string   `json:"content" db:"content"`
+	Type            string   `json:"type" db:"type"`
+	Votes           []string `json:"votes" db:"votes"`
+}
+
+// RetrospectiveAction is an action the team can take based on retro feedback
+type RetrospectiveAction struct {
+	ID              string `json:"id" db:"id"`
+	RetrospectiveID string `json:"retrospectiveId" db:"retrospective_id"`
+	Content         string `json:"content" db:"content"`
+	Completed       bool   `json:"completed" db:"completed"`
 }
 
 // User aka user

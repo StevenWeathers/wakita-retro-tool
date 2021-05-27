@@ -12,6 +12,8 @@ func (d *Database) CreateRetrospective(OwnerID string, RetrospectiveName string)
 		OwnerID:           OwnerID,
 		RetrospectiveName: RetrospectiveName,
 		Users:             make([]*RetrospectiveUser, 0),
+		Items:             make([]*RetrospectiveItem, 0),
+		Actions:           make([]*RetrospectiveAction, 0),
 	}
 
 	e := d.db.QueryRow(
@@ -53,6 +55,8 @@ func (d *Database) GetRetrospective(RetrospectiveID string) (*Retrospective, err
 	}
 
 	b.Users = d.GetRetrospectiveUsers(RetrospectiveID)
+	b.Items = d.GetRetrospectiveItems(RetrospectiveID)
+	b.Actions = d.GetRetrospectiveActions(RetrospectiveID)
 
 	return b, nil
 }

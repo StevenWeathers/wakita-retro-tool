@@ -104,6 +104,35 @@ func (s subscription) readPump(srv *server) {
 		retrospectiveID := s.arena
 
 		switch keyVal["type"] {
+		case "create_item":
+			var rs struct {
+				Type    string `json:"type"`
+				Content string `json:"content"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			items, err := srv.database.CreateRetrospectiveItem(retrospectiveID, userID, rs.Type, rs.Content)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_added", string(updatedItems), "")
+		case "create_action":
+			var rs struct {
+				Content string `json:"content"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			actions, err := srv.database.CreateRetrospectiveAction(retrospectiveID, userID, rs.Content)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedActions, _ := json.Marshal(actions)
+			msg = CreateSocketEvent("action_added", string(updatedActions), "")
 		case "promote_owner":
 			retrospective, err := srv.database.SetRetrospectiveOwner(retrospectiveID, userID, keyVal["value"])
 			if err != nil {

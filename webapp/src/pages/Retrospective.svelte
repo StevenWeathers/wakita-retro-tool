@@ -145,8 +145,6 @@
     }
 
     function toggleUsersPanel() {
-        showColorLegend = false
-        showPersonas = false
         showUsers = !showUsers
         eventTag('show_users', 'retrospective', `show: ${showUsers}`)
     }
@@ -163,7 +161,7 @@
 </svelte:head>
 
 {#if retrospective.name && !socketReconnecting && !socketError}
-    <div class="px-6 py-2 bg-white flex flex-wrap">
+    <div class="px-6 py-2 bg-gray-200 flex flex-wrap">
         <div class="w-1/3">
             <h1 class="text-3xl font-bold leading-tight">{retrospective.name}</h1>
         </div>
