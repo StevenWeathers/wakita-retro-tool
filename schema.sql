@@ -24,15 +24,15 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS retrospective (
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(256),
-    owner_id UUID REFERENCES users NOT NULL,
+    owner_id UUID,
     created_date TIMESTAMP DEFAULT NOW(),
     updated_date TIMESTAMP DEFAULT NOW(),
     CONSTRAINT r_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS retrospective_user (
-    retrospective_id UUID REFERENCES retrospective NOT NULL,
-    user_id UUID REFERENCES users NOT NULL,
+    retrospective_id UUID,
+    user_id UUID,
     active BOOL DEFAULT false,
     abandoned BOOL DEFAULT false,
     PRIMARY KEY (retrospective_id, user_id),
@@ -42,9 +42,9 @@ CREATE TABLE IF NOT EXISTS retrospective_user (
 
 CREATE TABLE IF NOT EXISTS retrospective_item (
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    retrospective_id UUID REFERENCES retrospective NOT NULL,
-    user_id UUID REFERENCES users NOT NULL,
-    parent_id UUID REFERENCES retrospective_item,
+    retrospective_id UUID,
+    user_id UUID,
+    parent_id UUID,
     content TEXT NOT NULL,
     votes JSONB DEFAULT '[]'::JSONB,
     type VARCHAR(16) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS retrospective_item (
 
 CREATE TABLE IF NOT EXISTS retrospective_action (
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    retrospective_id UUID REFERENCES retrospective NOT NULL,
+    retrospective_id UUID,
     content TEXT NOT NULL,
     completed BOOL DEFAULT false,
     CONSTRAINT ra_retrospective_id_fkey FOREIGN KEY (retrospective_id) REFERENCES retrospective(id) ON DELETE CASCADE
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS retrospective_action (
 
 CREATE TABLE IF NOT EXISTS user_reset (
     reset_id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES users NOT NULL,
+    user_id UUID,
     created_date TIMESTAMP DEFAULT NOW(),
     expire_date TIMESTAMP DEFAULT NOW() + INTERVAL '1 hour',
     CONSTRAINT ur_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS user_reset (
 
 CREATE TABLE IF NOT EXISTS user_verify (
     verify_id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES users NOT NULL,
+    user_id UUID,
     created_date TIMESTAMP DEFAULT NOW(),
     expire_date TIMESTAMP DEFAULT NOW() + INTERVAL '24 hour',
     CONSTRAINT uv_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS user_verify (
 
 CREATE TABLE IF NOT EXISTS api_keys (
     id TEXT NOT NULL PRIMARY KEY,
-    user_id UUID REFERENCES users NOT NULL,
+    user_id UUID,
     name VARCHAR(256) NOT NULL,
     active BOOL DEFAULT true,
     created_date TIMESTAMP DEFAULT NOW(),

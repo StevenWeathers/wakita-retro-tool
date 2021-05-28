@@ -22,9 +22,16 @@
         xfetch(`${apiPrefix}/retrospective`, { body })
             .then(res => res.json())
             .then(function(retrospective) {
-                eventTag('create_retrospective', 'engagement', 'success', () => {
-                    router.route(`${appRoutes.retrospective}/${retrospective.id}`)
-                })
+                eventTag(
+                    'create_retrospective',
+                    'engagement',
+                    'success',
+                    () => {
+                        router.route(
+                            `${appRoutes.retrospective}/${retrospective.id}`,
+                        )
+                    },
+                )
             })
             .catch(function(error) {
                 notifications.danger('Error encountered creating retrospective')

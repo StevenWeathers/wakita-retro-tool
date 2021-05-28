@@ -35,8 +35,7 @@
     setupI18n()
 
     const { AllowRegistration, AppVersion, PathPrefix } = appConfig
-    const footerLinkClasses =
-        'no-underline text-blue-500 hover:text-blue-800'
+    const footerLinkClasses = 'no-underline text-blue-500 hover:text-blue-800'
 
     let notifications
 
@@ -313,7 +312,9 @@
         {xfetch} />
 
     <footer class="p-6 text-center">
-        <GithubIcon />&nbsp;<a
+        <GithubIcon />
+        &nbsp;
+        <a
             href="https://github.com/StevenWeathers/wakita-retro-tool"
             class="{footerLinkClasses}">
             {$_('appName')}

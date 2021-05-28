@@ -27,7 +27,7 @@
         teamCount: 0,
         apikeyCount: 0,
         activeRetroCount: 0,
-        activeRetroUserCount: 0
+        activeRetroUserCount: 0,
     }
 
     function getAppStats() {
@@ -49,7 +49,9 @@
                 getAppStats()
             })
             .catch(function(error) {
-                notifications.danger('Error encountered cleaning retrospectives')
+                notifications.danger(
+                    'Error encountered cleaning retrospectives',
+                )
                 eventTag('admin_clean_retrospectives', 'engagement', 'failure')
             })
     }
@@ -129,10 +131,10 @@
                     {appStats.teamCount}
                 </div>
                 {#if APIEnabled}
-                <div class="w-1/4">
-                    <div class="mb-2 font-bold">API Keys</div>
-                    {appStats.apikeyCount}
-                </div>
+                    <div class="w-1/4">
+                        <div class="mb-2 font-bold">API Keys</div>
+                        {appStats.apikeyCount}
+                    </div>
                 {/if}
             </div>
         </div>

@@ -82,14 +82,15 @@
             <div class="w-1/2">
                 <h3 class="text-2xl font-bold">Open Source</h3>
                 <p class="px-2">
-                    Check out the <GithubIcon />
+                    Check out the
+                    <GithubIcon />
                     <a
                         href="https://github.com/StevenWeathers/wakita-retro-tool"
                         class="feature-link">
                         repository
                     </a>
-                    to request or contribute enhancements, locale
-                    translations, and bug fixes or to
+                    to request or contribute enhancements, locale translations,
+                    and bug fixes or to
                     <a
                         href="https://github.com/StevenWeathers/wakita-retro-tool#donations"
                         class="feature-link">
@@ -121,17 +122,19 @@
                 <h3 class="text-2xl font-bold">Organizations and Teams</h3>
                 <p class="px-2">
                     Create organizations with departments and teams at each
-                    level to associate retrospective's to a team for quick access.
-                    Just a small team?, no problem! Stand alone teams can be
-                    created without the need for organizations.
+                    level to associate retrospective's to a team for quick
+                    access. Just a small team?, no problem! Stand alone teams
+                    can be created without the need for organizations.
                 </p>
             </div>
             <div class="w-1/2">
                 <h3 class="text-2xl font-bold">Feature rich retrospectives</h3>
                 <p class="px-2">
-                    Team members add "What went well" and "What needs improvement" then vote on them.
+                    Team members add "What went well" and "What needs
+                    improvement" then vote on them.
                     <br />
-                    Action items can be added to the Team for future retro comparison and tracking.
+                    Action items can be added to the Team for future retro
+                    comparison and tracking.
                 </p>
             </div>
         </div>
@@ -158,9 +161,9 @@
             <div class="w-1/2">
                 <h3 class="text-2xl font-bold">Secure</h3>
                 <p class="px-2">
-                    Every retrospective has a randomly generated, not incremetal ID
-                    which keeps strangers from joining your retrospective without
-                    the share link.
+                    Every retrospective has a randomly generated, not incremetal
+                    ID which keeps strangers from joining your retrospective
+                    without the share link.
                     <br />
                     HTTPS, backend only cookie, and salted/hashed password
                     storage keep your authenticated sessions secure.

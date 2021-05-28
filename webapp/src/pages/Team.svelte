@@ -108,7 +108,8 @@
     }
 
     function getRetrospectives() {
-        const retrospectivesOffset = (retrospectivesPage - 1) * retrospectivesPageLimit
+        const retrospectivesOffset =
+            (retrospectivesPage - 1) * retrospectivesPageLimit
         xfetch(
             `${teamPrefix}/retrospectives/${retrospectivesPageLimit}/${retrospectivesOffset}`,
         )

@@ -8,6 +8,7 @@
     import UsersIcon from '../components/icons/UsersIcon.svelte'
     import HollowButton from '../components/HollowButton.svelte'
     import DownCarrotIcon from '../components/icons/DownCarrotIcon.svelte'
+    import DeleteRetrospective from '../components/DeleteRetrospective.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
 
@@ -26,6 +27,7 @@
         users: [],
     }
     let showUsers = false
+    let showDeleteRetrospective = false
 
     const onSocketMessage = function(evt) {
         const parsedEvent = JSON.parse(evt.data)
@@ -55,6 +57,7 @@
                 break
             case 'retrospective_conceded':
                 // retrospective over, goodbye.
+                notifications.warning('Retrospective deleted')
                 router.route(appRoutes.retrospectives)
                 break
             default:
@@ -84,7 +87,9 @@
                     })
                 } else if (e.code === 4003) {
                     eventTag('socket_duplicate', 'retrospective', '', () => {
-                        notifications.danger(`Duplicate retrospective session exists for your ID`)
+                        notifications.danger(
+                            `Duplicate retrospective session exists for your ID`,
+                        )
                         router.route(`${appRoutes.retrospectives}`)
                     })
                 } else if (e.code === 4002) {
@@ -149,6 +154,10 @@
         eventTag('show_users', 'retrospective', `show: ${showUsers}`)
     }
 
+    const toggleDeleteRetrospective = () => {
+        showDeleteRetrospective = !showDeleteRetrospective
+    }
+
     onMount(() => {
         if (!$user.id) {
             router.route(`${appRoutes.login}/${retrospectiveId}`)
@@ -163,14 +172,16 @@
 {#if retrospective.name && !socketReconnecting && !socketError}
     <div class="px-6 py-2 bg-gray-200 flex flex-wrap">
         <div class="w-1/3">
-            <h1 class="text-3xl font-bold leading-tight">{retrospective.name}</h1>
+            <h1 class="text-3xl font-bold leading-tight">
+                {retrospective.name}
+            </h1>
         </div>
         <div class="w-2/3 text-right">
             <div>
                 {#if retrospective.owner_id === $user.id}
                     <HollowButton
                         color="red"
-                        onClick="{concedeRetrospective}"
+                        onClick="{toggleDeleteRetrospective}"
                         additionalClasses="mr-2">
                         Delete Retrospective
                     </HollowButton>
@@ -239,4 +250,10 @@
             </div>
         </div>
     </PageLayout>
+{/if}
+
+{#if showDeleteRetrospective}
+    <DeleteRetrospective
+        toggleDelete="{toggleDeleteRetrospective}"
+        handleDelete="{concedeRetrospective}" />
 {/if}
