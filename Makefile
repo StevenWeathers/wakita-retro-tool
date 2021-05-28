@@ -33,10 +33,7 @@ clean:
 	rm -rf pkged*.go
 
 format:
-	$(GOFMT) -s -w handlers.go
-	$(GOFMT) -s -w client.go
-	$(GOFMT) -s -w hub.go
-	$(GOFMT) -s -w main.go
+	$(GOFMT) -l -s -w .
 
 # Cross compilation
 build-linux:

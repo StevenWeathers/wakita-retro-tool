@@ -40,8 +40,10 @@ type Retrospective struct {
 	OwnerID           string                 `json:"ownerId" db:"ownder_id"`
 	RetrospectiveName string                 `json:"name" db:"name"`
 	Users             []*RetrospectiveUser   `json:"users"`
-	Items             []*RetrospectiveItem   `json:"items"`
-	Actions           []*RetrospectiveAction `json:"actions"`
+	WorkedItems       []*RetrospectiveItem   `json:"workedItems"`
+	ImproveItems      []*RetrospectiveItem   `json:"improveItems"`
+	QuestionItems     []*RetrospectiveItem   `json:"questionItems"`
+	ActionItems       []*RetrospectiveAction `json:"actionItems"`
 	Phase             int                    `json:"phase" db:"phase"`
 }
 

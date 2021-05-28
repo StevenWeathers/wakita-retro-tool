@@ -6,37 +6,77 @@ import (
 	"log"
 )
 
-// CreateRetroItem adds a new item to the retrospective
-func (d *Database) CreateRetrospectiveItem(RetrospectiveID string, UserID string, Type string, Content string) ([]*RetrospectiveItem, error) {
+// CreateRetrospectiveItemWorked adds a worked item to the retrospective
+func (d *Database) CreateRetrospectiveItemWorked(RetrospectiveID string, UserID string, Content string) ([]*RetrospectiveItem, error) {
+	var Type string = "worked"
 	if _, err := d.db.Exec(
-		`INSERT INTO retrospective_item VALUES (retrospective_id = $1, type = $2, content = $3);`, RetrospectiveID, Type, Content,
+		`INSERT INTO retrospective_item
+		(retrospective_id, type, content, user_id)
+		VALUES ($1,$2, $3, $4);`,
+		RetrospectiveID, Type, Content, UserID,
 	); err != nil {
 		log.Println(err)
 	}
 
-	items := d.GetRetrospectiveItems(RetrospectiveID)
+	items, _, _ := d.GetRetrospectiveItems(RetrospectiveID)
+
+	return items, nil
+}
+
+// CreateRetrospectiveItemImprove adds a improve item to the retrospective
+func (d *Database) CreateRetrospectiveItemImprove(RetrospectiveID string, UserID string, Content string) ([]*RetrospectiveItem, error) {
+	var Type string = "improve"
+	if _, err := d.db.Exec(
+		`INSERT INTO retrospective_item
+		(retrospective_id, type, content, user_id)
+		VALUES ($1,$2, $3, $4);`,
+		RetrospectiveID, Type, Content, UserID,
+	); err != nil {
+		log.Println(err)
+	}
+
+	_, items, _ := d.GetRetrospectiveItems(RetrospectiveID)
+
+	return items, nil
+}
+
+// CreateRetrospectiveItemQuestion adds a question item to the retrospective
+func (d *Database) CreateRetrospectiveItemQuestion(RetrospectiveID string, UserID string, Content string) ([]*RetrospectiveItem, error) {
+	var Type string = "question"
+	if _, err := d.db.Exec(
+		`INSERT INTO retrospective_item
+		(retrospective_id, type, content, user_id)
+		VALUES ($1,$2, $3, $4);`,
+		RetrospectiveID, Type, Content, UserID,
+	); err != nil {
+		log.Println(err)
+	}
+
+	_, _, items := d.GetRetrospectiveItems(RetrospectiveID)
 
 	return items, nil
 }
 
 // DeleteRetrospectiveItem removes a goal from the current board by ID
-func (d *Database) DeleteRetrospectiveItem(RetrospectiveID string, userID string, ItemID string) ([]*RetrospectiveItem, error) {
+func (d *Database) DeleteRetrospectiveItem(RetrospectiveID string, userID string, ItemID string) (WorkedItems []*RetrospectiveItem, ImproveItems []*RetrospectiveItem, QuestionItems []*RetrospectiveItem, DeleteError error) {
 	if _, err := d.db.Exec(
 		`DELETE FROM retrospective_item WHERE id = $1;`, ItemID); err != nil {
 		log.Println(err)
 	}
 
-	items := d.GetRetrospectiveItems(RetrospectiveID)
+	workedItems, improveItems, questionItems := d.GetRetrospectiveItems(RetrospectiveID)
 
-	return items, nil
+	return workedItems, improveItems, questionItems, nil
 }
 
 // GetRetrospectiveItems retrieves retrospective items from the DB
-func (d *Database) GetRetrospectiveItems(RetrospectiveID string) []*RetrospectiveItem {
-	var items = make([]*RetrospectiveItem, 0)
+func (d *Database) GetRetrospectiveItems(RetrospectiveID string) (Worked []*RetrospectiveItem, Improve []*RetrospectiveItem, Question []*RetrospectiveItem) {
+	var itemsWorked = make([]*RetrospectiveItem, 0)
+	var itemsImprove = make([]*RetrospectiveItem, 0)
+	var itemsQuestion = make([]*RetrospectiveItem, 0)
 
 	itemRows, itemsErr := d.db.Query(
-		`SELECT id, retrospective_id, user_id, parent_id, content, votes, type FROM retrospective_item WHERE id = $1;`,
+		`SELECT id, retrospective_id, user_id, parent_id, content, votes, type FROM retrospective_item WHERE retrospective_id = $1;`,
 		RetrospectiveID,
 	)
 	if itemsErr == nil {
@@ -61,10 +101,20 @@ func (d *Database) GetRetrospectiveItems(RetrospectiveID string) []*Retrospectiv
 				if jsonErr != nil {
 					log.Println(jsonErr)
 				}
-				items = append(items, ri)
+				if ri.Type == "worked" {
+					itemsWorked = append(itemsWorked, ri)
+				}
+				if ri.Type == "improve" {
+					itemsImprove = append(itemsImprove, ri)
+				}
+				if ri.Type == "question" {
+					itemsQuestion = append(itemsQuestion, ri)
+				}
 			}
 		}
+	} else {
+		log.Println(itemsErr)
 	}
 
-	return items
+	return itemsWorked, itemsImprove, itemsQuestion
 }

@@ -7,7 +7,7 @@ import (
 // CreateRetroAction adds a new action to the retrospective
 func (d *Database) CreateRetrospectiveAction(RetrospectiveID string, UserID string, Content string) ([]*RetrospectiveAction, error) {
 	if _, err := d.db.Exec(
-		`INSERT INTO retrospective_action VALUES (retrospective_id = $1, content = $2);`, RetrospectiveID, Content,
+		`INSERT INTO retrospective_action (retrospective_id, content) VALUES ($1, $2);`, RetrospectiveID, Content,
 	); err != nil {
 		log.Println(err)
 	}
@@ -34,7 +34,7 @@ func (d *Database) GetRetrospectiveActions(RetrospectiveID string) []*Retrospect
 	var actions = make([]*RetrospectiveAction, 0)
 
 	actionRows, actionsErr := d.db.Query(
-		`SELECT id, retrospective_id, content, completed FROM retrospective_action WHERE id = $1;`,
+		`SELECT id, retrospective_id, content, completed FROM retrospective_action WHERE retrospective_id = $1;`,
 		RetrospectiveID,
 	)
 	if actionsErr == nil {

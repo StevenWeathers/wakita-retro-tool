@@ -27,9 +27,18 @@
         ownerId: '',
         phase: 1,
         users: [],
+        workedItems: [],
+        improveItems: [],
+        questionItems: [],
+        actionItems: []
     }
     let showUsers = false
     let showDeleteRetrospective = false
+
+    let workedWell = ''
+    let needsImprovement = ''
+    let question = ''
+    let actionItem = ''
 
     const onSocketMessage = function(evt) {
         const parsedEvent = JSON.parse(evt.data)
@@ -57,6 +66,18 @@
             case 'retrospective_updated':
                 retrospective = JSON.parse(parsedEvent.value)
                 break
+            case 'item_worked_updated':
+                retrospective.workedItems = JSON.parse(parsedEvent.value)
+                break;
+            case 'item_improve_updated':
+                retrospective.improveItems = JSON.parse(parsedEvent.value)
+                break;
+            case 'item_question_updated':
+                retrospective.questionItems = JSON.parse(parsedEvent.value)
+                break;
+            case 'action_updated':
+                retrospective.actionItems = JSON.parse(parsedEvent.value)
+                break;
             case 'retrospective_conceded':
                 // retrospective over, goodbye.
                 notifications.warning('Retrospective deleted')
@@ -160,6 +181,66 @@
         showDeleteRetrospective = !showDeleteRetrospective
     }
 
+    const handleWorkedWell = (evt) => {
+        evt.preventDefault()
+
+        sendSocketEvent('create_item_worked', JSON.stringify({
+            content: workedWell
+        }))
+        workedWell = ''
+    }
+
+    const handleNeedsImprovement = (evt) => {
+        evt.preventDefault()
+
+        sendSocketEvent('create_item_improve', JSON.stringify({
+            content: needsImprovement
+        }))
+        needsImprovement = ''
+    }
+
+    const handleQuestion = (evt) => {
+        evt.preventDefault()
+
+        sendSocketEvent('create_item_question', JSON.stringify({
+            content: question
+        }))
+        question = ''
+    }
+
+    const handleActionItem = (evt) => {
+        evt.preventDefault()
+
+        sendSocketEvent('create_action', JSON.stringify({
+            content: actionItem
+        }))
+        actionItem = ''
+    }
+
+    const handleWorkedDelete = (id) => () => {
+        sendSocketEvent('delete_item_worked', JSON.stringify({
+            id
+        }))
+    }
+    
+    const handleImproveDelete = (id) => () => {
+        sendSocketEvent('delete_item_improve', JSON.stringify({
+            id
+        }))
+    }
+
+    const handleQuestionDelete = (id) => () => {
+        sendSocketEvent('delete_item_question', JSON.stringify({
+            id
+        }))
+    }
+
+    const handleActionDelete = (id) => () => {
+        sendSocketEvent('delete_action', JSON.stringify({
+            id
+        }))
+    }
+
     onMount(() => {
         if (!$user.id) {
             router.route(`${appRoutes.login}/${retrospectiveId}`)
@@ -246,17 +327,82 @@
 
     </div>
     <div class="flex p-4 min-h-screen">
-        <div class="w-1/4 mx-2 bg-white shadow">
-            What worked well
+        <div class="w-1/4 mx-2 p-2  bg-white shadow">
+            <form on:submit={handleWorkedWell} class="flex mb-2">
+                <input
+                    bind:value="{workedWell}"
+                    placeholder="What worked well..."
+                    class="border-gray-300 border-2
+                    appearance-none rounded py-2 px-3
+                    text-gray-700 leading-tight focus:outline-none
+                    focus:bg-white focus:border-orange-500 w-full"
+                    id="workedWell"
+                    name="workedWell"
+                    type="text"
+                    required />
+                <button type="submit" class="hidden" />
+            </form>
+            {#each retrospective.workedItems as item}
+                <div><button on:click={handleWorkedDelete(item.id)}>X</button> {item.content}</div>
+            {/each}
         </div>
-        <div class="w-1/4 mx-2 bg-white shadow">
-            Needs improvement
+        <div class="w-1/4 mx-2 p-2  bg-white shadow">
+            <form on:submit={handleNeedsImprovement} class="mb-2">
+                <input
+                    bind:value="{needsImprovement}"
+                    placeholder="What needs improvement..."
+                    class="border-gray-300 border-2
+                    appearance-none rounded w-full py-2 px-3
+                    text-gray-700 leading-tight focus:outline-none
+                    focus:bg-white focus:border-orange-500"
+                    id="needsImprovement"
+                    name="needsImprovement"
+                    type="text"
+                    required />
+                <button type="submit" class="hidden" />
+            </form>
+            {#each retrospective.improveItems as item}
+                <div><button on:click={handleImproveDelete(item.id)}>X</button> {item.content}</div>
+            {/each}
         </div>
-        <div class="w-1/4 mx-2 bg-white shadow">
-            Questions
+        <div class="w-1/4 mx-2 p-2 bg-white shadow">
+            <form on:submit={handleQuestion} class="mb-2">
+                <input
+                    bind:value="{question}"
+                    placeholder="I want to ask..."
+                    class="border-gray-300 border-2
+                    appearance-none rounded w-full py-2 px-3
+                    text-gray-700 leading-tight focus:outline-none
+                    focus:bg-white focus:border-orange-500"
+                    id="question"
+                    name="question"
+                    type="text"
+                    required />
+                <button type="submit" class="hidden" />
+            </form>
+            {#each retrospective.questionItems as item}
+                <div><button on:click={handleQuestionDelete(item.id)}>X</button> {item.content}</div>
+            {/each}
         </div>
-        <div class="w-1/4 mx-2 bg-white shadow">
-            Action Items
+        <div class="w-1/4 mx-2 p-2  bg-white shadow">
+            <form on:submit={handleActionItem} class="mb-2">
+                <input
+                    bind:value="{actionItem}"
+                    placeholder="Action item..."
+                    class="border-gray-300 border-2
+                    appearance-none rounded w-full py-2 px-3
+                    text-gray-700 leading-tight focus:outline-none
+                    focus:bg-white focus:border-orange-500"
+                    id="actionItem"
+                    name="actionItem"
+                    type="text"
+                    required
+                    />
+                <button type="submit" class="hidden" />
+            </form>
+            {#each retrospective.actionItems as item}
+                <div><button on:click={handleActionDelete(item.id)}>X</button> {item.content}</div>
+            {/each}
         </div>
     </div>
 {:else}

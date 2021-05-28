@@ -13,8 +13,10 @@ func (d *Database) CreateRetrospective(OwnerID string, RetrospectiveName string)
 		RetrospectiveName: RetrospectiveName,
 		Phase:             1,
 		Users:             make([]*RetrospectiveUser, 0),
-		Items:             make([]*RetrospectiveItem, 0),
-		Actions:           make([]*RetrospectiveAction, 0),
+		WorkedItems:       make([]*RetrospectiveItem, 0),
+		ImproveItems:      make([]*RetrospectiveItem, 0),
+		QuestionItems:     make([]*RetrospectiveItem, 0),
+		ActionItems:       make([]*RetrospectiveAction, 0),
 	}
 
 	e := d.db.QueryRow(
@@ -38,6 +40,10 @@ func (d *Database) GetRetrospective(RetrospectiveID string) (*Retrospective, err
 		RetrospectiveName: "",
 		Phase:             1,
 		Users:             make([]*RetrospectiveUser, 0),
+		WorkedItems:       make([]*RetrospectiveItem, 0),
+		ImproveItems:      make([]*RetrospectiveItem, 0),
+		QuestionItems:     make([]*RetrospectiveItem, 0),
+		ActionItems:       make([]*RetrospectiveAction, 0),
 	}
 
 	// get retrospective
@@ -57,9 +63,12 @@ func (d *Database) GetRetrospective(RetrospectiveID string) (*Retrospective, err
 		return nil, errors.New("Not found")
 	}
 
+	worked, improve, question := d.GetRetrospectiveItems(RetrospectiveID)
 	b.Users = d.GetRetrospectiveUsers(RetrospectiveID)
-	b.Items = d.GetRetrospectiveItems(RetrospectiveID)
-	b.Actions = d.GetRetrospectiveActions(RetrospectiveID)
+	b.WorkedItems = worked
+	b.ImproveItems = improve
+	b.QuestionItems = question
+	b.ActionItems = d.GetRetrospectiveActions(RetrospectiveID)
 
 	return b, nil
 }
