@@ -11,6 +11,7 @@ func (d *Database) CreateRetrospective(OwnerID string, RetrospectiveName string)
 		RetrospectiveID:   "",
 		OwnerID:           OwnerID,
 		RetrospectiveName: RetrospectiveName,
+		Phase:             1,
 		Users:             make([]*RetrospectiveUser, 0),
 		Items:             make([]*RetrospectiveItem, 0),
 		Actions:           make([]*RetrospectiveAction, 0),
@@ -35,19 +36,21 @@ func (d *Database) GetRetrospective(RetrospectiveID string) (*Retrospective, err
 		RetrospectiveID:   RetrospectiveID,
 		OwnerID:           "",
 		RetrospectiveName: "",
+		Phase:             1,
 		Users:             make([]*RetrospectiveUser, 0),
 	}
 
 	// get retrospective
 	e := d.db.QueryRow(
 		`SELECT
-			id, name, owner_id
+			id, name, owner_id, phase
 		FROM retrospective WHERE id = $1`,
 		RetrospectiveID,
 	).Scan(
 		&b.RetrospectiveID,
 		&b.RetrospectiveName,
 		&b.OwnerID,
+		&b.Phase,
 	)
 	if e != nil {
 		log.Println(e)
@@ -77,12 +80,14 @@ func (d *Database) GetRetrospectivesByUser(UserID string) ([]*Retrospective, err
 			RetrospectiveID:   "",
 			OwnerID:           "",
 			RetrospectiveName: "",
+			Phase:             1,
 			Users:             make([]*RetrospectiveUser, 0),
 		}
 		if err := retrospectiveRows.Scan(
 			&b.RetrospectiveID,
 			&b.RetrospectiveName,
 			&b.OwnerID,
+			&b.Phase,
 		); err != nil {
 			log.Println(err)
 		} else {

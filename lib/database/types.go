@@ -36,12 +36,13 @@ type RetrospectiveUser struct {
 
 // Retrospective A story mapping board
 type Retrospective struct {
-	RetrospectiveID   string                 `json:"id"`
-	OwnerID           string                 `json:"owner_id"`
-	RetrospectiveName string                 `json:"name"`
+	RetrospectiveID   string                 `json:"id" db:"id"`
+	OwnerID           string                 `json:"ownerId" db:"ownder_id"`
+	RetrospectiveName string                 `json:"name" db:"name"`
 	Users             []*RetrospectiveUser   `json:"users"`
 	Items             []*RetrospectiveItem   `json:"items"`
 	Actions           []*RetrospectiveAction `json:"actions"`
+	Phase             int                    `json:"phase" db:"phase"`
 }
 
 // RetrospectiveItem can be a pro (went well/worked), con (needs improvement), or a question

@@ -23,7 +23,7 @@
     let socketError = false
     let socketReconnecting = false
     let retrospective = {
-        owner_id: '',
+        ownerId: '',
         users: [],
     }
     let showUsers = false
@@ -178,7 +178,7 @@
         </div>
         <div class="w-2/3 text-right">
             <div>
-                {#if retrospective.owner_id === $user.id}
+                {#if retrospective.ownerId === $user.id}
                     <HollowButton
                         color="red"
                         onClick="{toggleDeleteRetrospective}"

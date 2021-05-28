@@ -46,7 +46,7 @@
                             md:text-xl leading-tight">
                             {retrospective.name}
                             <div class="font-semibold md:text-sm text-gray-600">
-                                {#if $user.id === retrospective.owner_id}
+                                {#if $user.id === retrospective.ownerId}
                                     Owner
                                 {/if}
                             </div>

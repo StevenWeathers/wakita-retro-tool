@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS retrospective (
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(256),
     owner_id UUID,
+    phase SMALLINT NOT NULL DEFAULT 1,
     created_date TIMESTAMP DEFAULT NOW(),
     updated_date TIMESTAMP DEFAULT NOW(),
     CONSTRAINT r_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
@@ -387,11 +388,11 @@ $$ LANGUAGE plpgsql;
 -- Get Retrospectives by User ID
 DROP FUNCTION IF EXISTS get_retrospectives_by_user(uuid);
 CREATE FUNCTION get_retrospectives_by_user(userId UUID) RETURNS table (
-    id UUID, name VARCHAR(256), owner_id UUID
+    id UUID, name VARCHAR(256), owner_id UUID, phase SMALLINT
 ) AS $$
 BEGIN
     RETURN QUERY
-        SELECT b.id, b.name, b.owner_id
+        SELECT b.id, b.name, b.owner_id, b.phase
 		FROM retrospective b
 		LEFT JOIN retrospective_user su ON b.id = su.retrospective_id WHERE su.user_id = userId AND su.abandoned = false
 		GROUP BY b.id ORDER BY b.created_date DESC;
