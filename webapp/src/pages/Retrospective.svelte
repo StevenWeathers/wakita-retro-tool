@@ -8,6 +8,7 @@
     import UsersIcon from '../components/icons/UsersIcon.svelte'
     import HollowButton from '../components/HollowButton.svelte'
     import DownCarrotIcon from '../components/icons/DownCarrotIcon.svelte'
+    import ChevronRight from '../components/icons/ChevronRight.svelte'
     import DeleteRetrospective from '../components/DeleteRetrospective.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
@@ -24,6 +25,7 @@
     let socketReconnecting = false
     let retrospective = {
         ownerId: '',
+        phase: 1,
         users: [],
     }
     let showUsers = false
@@ -170,7 +172,7 @@
 </svelte:head>
 
 {#if retrospective.name && !socketReconnecting && !socketError}
-    <div class="px-6 py-2 bg-gray-200 flex flex-wrap">
+    <div class="px-6 py-2 bg-gray-100 border-b border-t border-gray-400 flex flex-wrap">
         <div class="w-1/3">
             <h1 class="text-3xl font-bold leading-tight">
                 {retrospective.name}
@@ -228,7 +230,35 @@
             </div>
         </div>
     </div>
-    <div>Retrospective board here...</div>
+    <div class="px-6 py-2 bg-gray-100 border-b border-gray-400 flex flex-wrap">
+        <div class="w-1/3">
+            Brainstorm <ChevronRight class="inline-block" /> Group &amp; Vote <ChevronRight class="inline-block" /> Add action items <ChevronRight class="inline-block" /> Done
+        </div>
+        <div class="w-2/3 text-right text-gray-700">
+            {#if retrospective.phase === 1}
+                Add your comments below, you won't be able to see your peers until next step
+            {:else if retrospective.phase === 2}
+                Drag and drop comments to group them together and vote for the ones you'd like to discuss about
+            {:else if retrospective.phase === 3}
+                Add action items, you can no longer group or vote comments
+            {/if}
+        </div>
+
+    </div>
+    <div class="flex p-4 min-h-screen">
+        <div class="w-1/4 mx-2 bg-white shadow">
+            What worked well
+        </div>
+        <div class="w-1/4 mx-2 bg-white shadow">
+            Needs improvement
+        </div>
+        <div class="w-1/4 mx-2 bg-white shadow">
+            Questions
+        </div>
+        <div class="w-1/4 mx-2 bg-white shadow">
+            Action Items
+        </div>
+    </div>
 {:else}
     <PageLayout>
         <div class="flex items-center">
