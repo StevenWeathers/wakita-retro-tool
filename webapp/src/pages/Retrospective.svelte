@@ -231,6 +231,20 @@
         question = ''
     }
 
+    const unnestItem = (type, id) => () => {
+        sendSocketEvent(`unnest_item_${type}`, JSON.stringify({
+            id,
+            parentId: ''
+        }))
+    }
+
+    const handleItemDelete = (type, id) => () => {
+        sendSocketEvent(`delete_item_${type}`, JSON.stringify({
+            id,
+            phase: retrospective.phase
+        }))
+    }
+
     const handleActionItem = (evt) => {
         evt.preventDefault()
 
@@ -240,24 +254,10 @@
         actionItem = ''
     }
 
-    const handleWorkedDelete = (id) => () => {
-        sendSocketEvent('delete_item_worked', JSON.stringify({
+    const handleActionUpdate = (id, completed) => () => {
+        sendSocketEvent('update_action', JSON.stringify({
             id,
-            phase: retrospective.phase
-        }))
-    }
-    
-    const handleImproveDelete = (id) => () => {
-        sendSocketEvent('delete_item_improve', JSON.stringify({
-            id,
-            phase: retrospective.phase
-        }))
-    }
-
-    const handleQuestionDelete = (id) => () => {
-        sendSocketEvent('delete_item_question', JSON.stringify({
-            id,
-            phase: retrospective.phase
+            completed: !completed
         }))
     }
 
@@ -476,14 +476,14 @@
                         <div class="flex" data-dragdisabled={item.items.length > 0}>
                             <div class="flex-shrink">
                                 {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleWorkedDelete(item.id)} class="pr-2">X</button>
+                                    <button on:click={handleItemDelete('worked', item.id)} class="pr-2">X</button>
                                 {/if}
                             </div>
                             <div class="flex-grow">
                                 <div>{item.content}</div>
                                 {#each item.items as child(child.id)}
                                     <div class="pl-4 border-l border-gray-300">
-                                        {child.content}
+                                        <button on:click={unnestItem('worked', child.id)}>&lt-</button>&nbsp;{child.content}
                                     </div>
                                 {/each}
                             </div>
@@ -514,14 +514,14 @@
                         <div class="flex" data-dragdisabled={item.items.length > 0}>
                             <div class="flex-shrink">
                                 {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleImproveDelete(item.id)} class="pr-2">X</button>
+                                    <button on:click={handleItemDelete('improve', item.id)} class="pr-2">X</button>
                                 {/if}
                             </div>
                             <div class="flex-grow">
                                 <div>{item.content}</div>
                                 {#each item.items as child(child.id)}
                                     <div class="pl-4 border-l border-gray-300">
-                                        {child.content}
+                                        <button on:click={unnestItem('improve', child.id)}>&lt-</button>&nbsp;{child.content}
                                     </div>
                                 {/each}
                             </div>
@@ -553,14 +553,14 @@
                     <div class="flex" data-dragdisabled={item.items.length > 0}>
                         <div class="flex-shrink">
                             {#if retrospective.phase === 1 || isOwner}
-                                <button on:click={handleQuestionDelete(item.id)} class="pr-2">X</button>
+                                <button on:click={handleItemDelete('question', item.id)} class="pr-2">X</button>
                             {/if}
                         </div>
                         <div class="flex-grow">
                             <div>{item.content}</div>
                             {#each item.items as child(child.id)}
                                 <div class="pl-4 border-l border-gray-300">
-                                    {child.content}
+                                    <button on:click={unnestItem('question', child.id)}>&lt-</button>&nbsp;{child.content}
                                 </div>
                             {/each}
                         </div>
@@ -587,8 +587,18 @@
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.actionItems as item}
-                <div>
-                    {#if isOwner}<button on:click={handleActionDelete(item.id)}>X</button> {/if}{item.content}
+                <div class="py-1 my-1">
+                    <div class="flex">
+                        <div class="flex-shrink">
+                            {#if isOwner}<button on:click={handleActionDelete(item.id)}>X</button> {/if}{item.content}
+                        </div>
+                        <div class="flex-grow">
+                            <div>{item.content}</div>
+                        </div>
+                        <div class="flex-shrink">
+                            <input type="checkbox" checked="{item.completed}" on:click={handleActionUpdate(item.id, item.completed)} />
+                        </div>
+                    </div>
                 </div>
             {/each}
         </div>
