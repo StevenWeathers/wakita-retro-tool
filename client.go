@@ -163,6 +163,51 @@ func (s subscription) readPump(srv *server) {
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
+		case "nest_item_worked":
+			var rs struct {
+				ItemID   string `json:"id"`
+				ParentID string `json:"parentId"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			items, _, _, err := srv.database.NestRetrospectiveItem(retrospectiveID, userID, rs.ItemID, rs.ParentID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
+		case "nest_item_improve":
+			var rs struct {
+				ItemID   string `json:"id"`
+				ParentID string `json:"parentId"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			_, items, _, err := srv.database.NestRetrospectiveItem(retrospectiveID, userID, rs.ItemID, rs.ParentID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
+		case "nest_item_question":
+			var rs struct {
+				ItemID   string `json:"id"`
+				ParentID string `json:"parentId"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			_, _, items, err := srv.database.NestRetrospectiveItem(retrospectiveID, userID, rs.ItemID, rs.ParentID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
 		case "delete_item_worked":
 			var rs struct {
 				ItemID string `json:"id"`

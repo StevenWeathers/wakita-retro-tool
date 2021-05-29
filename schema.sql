@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(64),
     created_date TIMESTAMP DEFAULT NOW(),
+    updated_date TIMESTAMP DEFAULT NOW(),
     last_active TIMESTAMP DEFAULT NOW(),
     email VARCHAR(320) UNIQUE,
     password TEXT,
@@ -49,9 +50,11 @@ CREATE TABLE IF NOT EXISTS retrospective_item (
     content TEXT NOT NULL,
     votes JSONB DEFAULT '[]'::JSONB,
     type VARCHAR(16) NOT NULL,
+    created_date TIMESTAMP DEFAULT NOW(),
+    updated_date TIMESTAMP DEFAULT NOW(),
     CONSTRAINT ri_retrospective_id_fkey FOREIGN KEY (retrospective_id) REFERENCES retrospective(id) ON DELETE CASCADE,
     CONSTRAINT ri_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT ri_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES retrospective_item ON DELETE SET NULL
+    CONSTRAINT ri_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES retrospective_item ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS retrospective_action (
@@ -59,6 +62,8 @@ CREATE TABLE IF NOT EXISTS retrospective_action (
     retrospective_id UUID,
     content TEXT NOT NULL,
     completed BOOL DEFAULT false,
+    created_date TIMESTAMP DEFAULT NOW(),
+    updated_date TIMESTAMP DEFAULT NOW(),
     CONSTRAINT ra_retrospective_id_fkey FOREIGN KEY (retrospective_id) REFERENCES retrospective(id) ON DELETE CASCADE
 );
 

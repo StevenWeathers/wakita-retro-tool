@@ -70,7 +70,19 @@ func (d *Database) CreateRetrospectiveItemQuestion(RetrospectiveID string, UserI
 	return items, nil
 }
 
-// DeleteRetrospectiveItem removes a goal from the current board by ID
+// NestRetrospectiveItem nests a item under another
+func (d *Database) NestRetrospectiveItem(RetrospectiveID string, userID string, ItemID string, ParentID string) (WorkedItems []*RetrospectiveItem, ImproveItems []*RetrospectiveItem, QuestionItems []*RetrospectiveItem, DeleteError error) {
+	if _, err := d.db.Exec(
+		`UPDATE retrospective_item SET parent_id = $2, updated_date = NOW() WHERE id = $1;`, ItemID, ParentID); err != nil {
+		log.Println(err)
+	}
+
+	workedItems, improveItems, questionItems := d.GetRetrospectiveItems(RetrospectiveID)
+
+	return workedItems, improveItems, questionItems, nil
+}
+
+// DeleteRetrospectiveItem removes a item from the current board by ID
 func (d *Database) DeleteRetrospectiveItem(RetrospectiveID string, userID string, ItemID string) (WorkedItems []*RetrospectiveItem, ImproveItems []*RetrospectiveItem, QuestionItems []*RetrospectiveItem, DeleteError error) {
 	if _, err := d.db.Exec(
 		`DELETE FROM retrospective_item WHERE id = $1;`, ItemID); err != nil {

@@ -20,19 +20,6 @@
     export let router
     export let eventTag
 
-    let drake = dragula({
-        isContainer: function(el) {
-            return el.classList.contains('item-list-item')
-        },
-        accepts: function (el, target, source) {
-            return source.dataset.itemtype === target.dataset.itemtype && target !== source
-        },
-        invalid: function (el, handle) {
-            const isDisabled = el.dataset.dragdisabled || "false"
-            return isDisabled === "true"
-        }
-    })
-
     const hostname = window.location.origin
     const socketExtension = window.location.protocol === 'https:' ? 'wss' : 'ws'
 
@@ -61,16 +48,22 @@
         switch (parsedEvent.type) {
             case 'init':
                 retrospective = JSON.parse(parsedEvent.value)
+                if (retrospective.phase !== 1) {
+                    retrospective.workedItems = nestItems(retrospective.workedItems)
+                    retrospective.improveItems = nestItems(retrospective.improveItems)
+                    retrospective.questionItems = nestItems(retrospective.questionItems)
+                }
                 eventTag('join', 'retrospective', '')
                 break
-            case 'user_joined':
+            case 'user_joined': {
                 retrospective.users = JSON.parse(parsedEvent.value)
                 const joinedUser = retrospective.users.find(
                     w => w.id === parsedEvent.userId,
                 )
                 notifications.success(`${joinedUser.name} joined.`)
                 break
-            case 'user_retreated':
+            }
+            case 'user_retreated': {
                 const leftUser = retrospective.users.find(
                     w => w.id === parsedEvent.userId,
                 )
@@ -78,18 +71,25 @@
 
                 notifications.danger(`${leftUser.name} retreated.`)
                 break
+            }
             case 'retrospective_updated':
                 retrospective = JSON.parse(parsedEvent.value)
                 break
-            case 'item_worked_updated':
-                retrospective.workedItems = JSON.parse(parsedEvent.value)
+            case 'item_worked_updated': {
+                const parsedValue = JSON.parse(parsedEvent.value)
+                retrospective.workedItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
                 break;
-            case 'item_improve_updated':
-                retrospective.improveItems = JSON.parse(parsedEvent.value)
+            }
+            case 'item_improve_updated': {
+                const parsedValue = JSON.parse(parsedEvent.value)
+                retrospective.improveItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
                 break;
-            case 'item_question_updated':
-                retrospective.questionItems = JSON.parse(parsedEvent.value)
+            }
+            case 'item_question_updated': {
+                const parsedValue = JSON.parse(parsedEvent.value)
+                retrospective.questionItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
                 break;
+            }
             case 'action_updated':
                 retrospective.actionItems = JSON.parse(parsedEvent.value)
                 break;
@@ -168,6 +168,8 @@
             ws.close()
         })
     })
+
+    $: isOwner = retrospective.ownerId === $user.id
 
     const sendSocketEvent = (type, value) => {
         ws.send(
@@ -271,35 +273,59 @@
         }))
     }
 
+    const nestItems = (items) => {
+        const parentMap = {}
+        const nestedItems = items.reduce((prev, item) => {
+            if (item.parentId !== "") {
+                parentMap[item.parentId] = parentMap[item.parentId] || []
+                parentMap[item.parentId].push(item)
+                return prev
+            }
+            prev.push(item)
+
+            return prev
+        }, [])
+
+        nestedItems.forEach(item => {
+            if (typeof parentMap[item.id] !== 'undefined') {
+                item.items = parentMap[item.id]
+            } else {
+                item.items = []
+            }
+        })
+
+        return nestedItems
+    }
+
+    let drake = dragula({
+        isContainer: function(el) {
+            return el.classList.contains('item-list-item')
+        },
+        moves: function (el, source, handle, sibling) {
+            return true
+        },
+        accepts: function (el, target, source) {
+            return source.dataset.itemtype === target.dataset.itemtype && target !== source
+        },
+        invalid: function (el) {
+            const isDisabled = el.dataset.dragdisabled || "false"
+            return isDisabled === "true" || retrospective.phase === 1 || !isOwner
+        }
+    })
+
     drake.on('drop', function(el, target, source, sibling) {
-        const itemTypeKey = `${source.dataset.itemtype}Items`
+        const itemType = source.dataset.itemtype
+        const itemTypeKey = `${itemType}Items`
         const itemId = source.dataset.itemid
         const parentItemId = target.dataset.itemid
         const childItem = retrospective[itemTypeKey].find(item => item.id === itemId)
 
-       console.log(`parent ${parentItemId} now has child ${itemId}`)
-
-       // this is temporary to mimic the behavior desired
-       // will implement associating parent and then traversing properly on socket event results
-       retrospective[itemTypeKey] = retrospective[itemTypeKey].reduce((prev, item) => {
-           if (item.id === itemId) {
-               return prev
-           }
-           if (item.id === parentItemId) {
-               item.items = [...(item.items || []), { ...childItem, parentId: parentItemId }]
-           }
-
-           prev.push(item)
-
-           return prev
-       }, [])
-
-       el.remove()
-       
-       console.log(retrospective[itemTypeKey])
+        el.remove()
+        sendSocketEvent(`nest_item_${itemType}`, JSON.stringify({
+            id: itemId,
+            parentId: parentItemId
+        }))
     })
-
-    $: isOwner = retrospective.ownerId === $user.id
 
     onMount(() => {
         if (!$user.id) {
@@ -446,15 +472,21 @@
             </form>
             <div>
                 {#each retrospective.workedItems as item(item.id)}
-                    <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="worked" data-itemId="{item.id}">
-                        <div data-dragdisabled={Array.isArray(item.items)}>
-                            <button on:click={handleWorkedDelete(item.id)}>X</button> {item.content}
-
-                            {#each (item.items || []) as child(child.id)}
-                                <div class="pl-8">
-                                    {child.content}
-                                </div>
-                            {/each}
+                    <div class="py-1 my-1 item-list-item" data-itemType="worked" data-itemId="{item.id}">
+                        <div class="flex" data-dragdisabled={item.items.length > 0}>
+                            <div class="flex-shrink">
+                                {#if retrospective.phase === 1 || isOwner}
+                                    <button on:click={handleWorkedDelete(item.id)} class="pr-2">X</button>
+                                {/if}
+                            </div>
+                            <div class="flex-grow">
+                                <div>{item.content}</div>
+                                {#each item.items as child(child.id)}
+                                    <div class="pl-4 border-l border-gray-300">
+                                        {child.content}
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
                     </div>
                 {/each}
@@ -478,15 +510,21 @@
             </form>
             <div>
                 {#each retrospective.improveItems as item}
-                    <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="improve" data-itemId="{item.id}">
-                        <div data-dragdisabled={Array.isArray(item.items)}>
-                            <button on:click={handleImproveDelete(item.id)}>X</button> {item.content}
-
-                            {#each (item.items || []) as child(child.id)}
-                                <div class="pl-8">
-                                    {child.content}
-                                </div>
-                            {/each}
+                    <div class="py-1 my-1 item-list-item" data-itemType="improve" data-itemId="{item.id}">
+                        <div class="flex" data-dragdisabled={item.items.length > 0}>
+                            <div class="flex-shrink">
+                                {#if retrospective.phase === 1 || isOwner}
+                                    <button on:click={handleImproveDelete(item.id)} class="pr-2">X</button>
+                                {/if}
+                            </div>
+                            <div class="flex-grow">
+                                <div>{item.content}</div>
+                                {#each item.items as child(child.id)}
+                                    <div class="pl-4 border-l border-gray-300">
+                                        {child.content}
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
                     </div>
                 {/each}
@@ -511,15 +549,21 @@
             </form>
             <div>
                 {#each retrospective.questionItems as item}
-                <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="question" data-itemId="{item.id}">
-                    <div data-dragdisabled={Array.isArray(item.items)}>
-                        <button on:click={handleQuestionDelete(item.id)}>X</button> {item.content}
-
-                        {#each (item.items || []) as child(child.id)}
-                            <div class="pl-8">
-                                {child.content}
-                            </div>
-                        {/each}
+                <div class="py-1 my-1 item-list-item" data-itemType="question" data-itemId="{item.id}">
+                    <div class="flex" data-dragdisabled={item.items.length > 0}>
+                        <div class="flex-shrink">
+                            {#if retrospective.phase === 1 || isOwner}
+                                <button on:click={handleQuestionDelete(item.id)} class="pr-2">X</button>
+                            {/if}
+                        </div>
+                        <div class="flex-grow">
+                            <div>{item.content}</div>
+                            {#each item.items as child(child.id)}
+                                <div class="pl-4 border-l border-gray-300">
+                                    {child.content}
+                                </div>
+                            {/each}
+                        </div>
                     </div>
                 </div>
                 {/each}
@@ -543,7 +587,9 @@
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.actionItems as item}
-                <div><button on:click={handleActionDelete(item.id)}>X</button> {item.content} <button></button></div>
+                <div>
+                    {#if isOwner}<button on:click={handleActionDelete(item.id)}>X</button> {/if}{item.content}
+                </div>
             {/each}
         </div>
     </div>
