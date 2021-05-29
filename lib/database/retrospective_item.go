@@ -124,7 +124,7 @@ func (d *Database) GetRetrospectiveItems(RetrospectiveID string) (Worked []*Retr
 	var itemsQuestion = make([]*RetrospectiveItem, 0)
 
 	itemRows, itemsErr := d.db.Query(
-		`SELECT id, retrospective_id, user_id, parent_id, content, votes, type FROM retrospective_item WHERE retrospective_id = $1;`,
+		`SELECT id, retrospective_id, user_id, parent_id, content, votes, type FROM retrospective_item WHERE retrospective_id = $1 ORDER BY created_date ASC;`,
 		RetrospectiveID,
 	)
 	if itemsErr == nil {

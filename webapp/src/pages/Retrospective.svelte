@@ -12,8 +12,15 @@
     import ChevronRight from '../components/icons/ChevronRight.svelte'
     import DeleteRetrospective from '../components/DeleteRetrospective.svelte'
     import SolidButton from '../components/SolidButton.svelte'
+    import QuestionCircle from '../components/icons/QuestionCircle.svelte'
+    import CheckCircle from '../components/icons/CheckCircle.svelte'
+    import SmileCircle from '../components/icons/SmileCircle.svelte'
+    import FrownCircle from '../components/icons/FrownCircle.svelte'
+    import CheckboxIcon from '../components/icons/CheckboxIcon.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
+import CrossCircle from '../components/icons/CrossCircle.svelte'
+import ArrowLeft from '../components/icons/ArrowLeft.svelte'
 
     export let retrospectiveId
     export let notifications
@@ -254,7 +261,10 @@
         actionItem = ''
     }
 
-    const handleActionUpdate = (id, completed) => () => {
+    const handleActionUpdate = (id, completed) => (evt) => {
+        console.log(id)
+        console.log(completed)
+
         sendSocketEvent('update_action', JSON.stringify({
             id,
             completed: !completed
@@ -361,6 +371,12 @@
         -ms-filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=20)';
         filter: alpha(opacity=20);
     }
+    :global(input:checked ~ div) {
+        @apply border-green-500;
+    }
+    :global(input:checked ~ div svg) {
+        @apply block;
+    }
 </style>
 
 <svelte:head>
@@ -441,7 +457,7 @@
         <div class="w-1/3">
             Brainstorm <ChevronRight class="inline-block" /> Group &amp; Vote <ChevronRight class="inline-block" /> Add action items <ChevronRight class="inline-block" /> Done
         </div>
-        <div class="w-2/3 text-right text-gray-700">
+        <div class="w-2/3 text-right text-gray-600">
             {#if retrospective.phase === 1}
                 Add your comments below, you won't be able to see your peers until next step
             {:else if retrospective.phase === 2}
@@ -453,37 +469,49 @@
 
     </div>
     <div class="flex p-4 min-h-screen">
-        <div class="w-1/4 mx-2 p-2  bg-white shadow">
-            <form on:submit={handleWorkedWell} class="flex mb-2">
-                <input
-                    bind:value="{workedWell}"
-                    placeholder="What worked well..."
-                    class="border-gray-300 border-2
-                    appearance-none rounded py-2 px-3
-                    text-gray-700 leading-tight focus:outline-none
-                    focus:bg-white focus:border-orange-500 w-full"
-                    id="workedWell"
-                    name="workedWell"
-                    type="text"
-                    required
-                    disabled={retrospective.phase > 1 && !isOwner}
-                    />
-                <button type="submit" class="hidden" />
-            </form>
+        <div class="w-1/4 mx-2 p-4 bg-white shadow">
+            <div class="flex items-center mb-2">
+                <div class="flex-shrink pr-1">
+                    <SmileCircle class="text-gray-400" height="24" width="24" />
+                </div>
+                <div class="flex-grow">
+                    <form on:submit={handleWorkedWell} class="flex">
+                        <input
+                            bind:value="{workedWell}"
+                            placeholder="What worked well..."
+                            class="border-gray-300 border-2
+                            appearance-none rounded py-2 px-3
+                            text-gray-700 leading-tight focus:outline-none
+                            focus:bg-white focus:border-orange-500 w-full"
+                            id="workedWell"
+                            name="workedWell"
+                            type="text"
+                            required
+                            disabled={retrospective.phase > 1 && !isOwner}
+                            />
+                        <button type="submit" class="hidden" />
+                    </form>
+                </div>
+            </div>
             <div>
                 {#each retrospective.workedItems as item(item.id)}
                     <div class="py-1 my-1 item-list-item" data-itemType="worked" data-itemId="{item.id}">
                         <div class="flex" data-dragdisabled={item.items.length > 0}>
                             <div class="flex-shrink">
                                 {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleItemDelete('worked', item.id)} class="pr-2">X</button>
+                                    <button on:click={handleItemDelete('worked', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
                                 {/if}
                             </div>
                             <div class="flex-grow">
                                 <div>{item.content}</div>
                                 {#each item.items as child(child.id)}
-                                    <div class="pl-4 border-l border-gray-300">
-                                        <button on:click={unnestItem('worked', child.id)}>&lt-</button>&nbsp;{child.content}
+                                    <div class="flex items-center pl-2 border-l border-gray-300">
+                                        <div class="flex-shrink">
+                                            {#if retrospective.phase > 1 && isOwner}
+                                                <button on:click={unnestItem('worked', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
+                                            {/if}
+                                        </div>
+                                        <div class="flex-grow">{child.content}</div>
                                     </div>
                                 {/each}
                             </div>
@@ -492,36 +520,48 @@
                 {/each}
             </div>
         </div>
-        <div class="w-1/4 mx-2 p-2  bg-white shadow">
-            <form on:submit={handleNeedsImprovement} class="mb-2">
-                <input
-                    bind:value="{needsImprovement}"
-                    placeholder="What needs improvement..."
-                    class="border-gray-300 border-2
-                    appearance-none rounded w-full py-2 px-3
-                    text-gray-700 leading-tight focus:outline-none
-                    focus:bg-white focus:border-orange-500"
-                    id="needsImprovement"
-                    name="needsImprovement"
-                    type="text"
-                    required
-                    disabled={retrospective.phase > 1 && !isOwner} />
-                <button type="submit" class="hidden" />
-            </form>
+        <div class="w-1/4 mx-2 p-4 bg-white shadow">
+            <div class="flex items-center mb-2">
+                <div class="flex-shrink pr-1">
+                    <FrownCircle class="text-gray-400" height="24" width="24" />
+                </div>
+                <div class="flex-grow">
+                    <form on:submit={handleNeedsImprovement}>
+                        <input
+                            bind:value="{needsImprovement}"
+                            placeholder="What needs improvement..."
+                            class="border-gray-300 border-2
+                            appearance-none rounded w-full py-2 px-3
+                            text-gray-700 leading-tight focus:outline-none
+                            focus:bg-white focus:border-orange-500"
+                            id="needsImprovement"
+                            name="needsImprovement"
+                            type="text"
+                            required
+                            disabled={retrospective.phase > 1 && !isOwner} />
+                        <button type="submit" class="hidden" />
+                    </form>
+                </div>
+            </div>
             <div>
                 {#each retrospective.improveItems as item}
                     <div class="py-1 my-1 item-list-item" data-itemType="improve" data-itemId="{item.id}">
                         <div class="flex" data-dragdisabled={item.items.length > 0}>
                             <div class="flex-shrink">
                                 {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleItemDelete('improve', item.id)} class="pr-2">X</button>
+                                    <button on:click={handleItemDelete('improve', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
                                 {/if}
                             </div>
                             <div class="flex-grow">
                                 <div>{item.content}</div>
                                 {#each item.items as child(child.id)}
-                                    <div class="pl-4 border-l border-gray-300">
-                                        <button on:click={unnestItem('improve', child.id)}>&lt-</button>&nbsp;{child.content}
+                                    <div class="flex items-center pl-2 border-l border-gray-300">
+                                        <div class="flex-shrink">
+                                            {#if retrospective.phase > 1 && isOwner}
+                                                <button on:click={unnestItem('improve', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
+                                            {/if}
+                                        </div>
+                                        <div class="flex-grow">{child.content}</div>
                                     </div>
                                 {/each}
                             </div>
@@ -530,38 +570,50 @@
                 {/each}
             </div>
         </div>
-        <div class="w-1/4 mx-2 p-2 bg-white shadow">
-            <form on:submit={handleQuestion} class="mb-2">
-                <input
-                    bind:value="{question}"
-                    placeholder="I want to ask..."
-                    class="border-gray-300 border-2
-                    appearance-none rounded w-full py-2 px-3
-                    text-gray-700 leading-tight focus:outline-none
-                    focus:bg-white focus:border-orange-500"
-                    id="question"
-                    name="question"
-                    type="text"
-                    required
-                    disabled={retrospective.phase > 1 && !isOwner}
-                    />
-                <button type="submit" class="hidden" />
-            </form>
+        <div class="w-1/4 mx-2 p-4 bg-white shadow">
+            <div class="flex items-center mb-2">
+                <div class="flex-shrink pr-1">
+                    <QuestionCircle class="text-gray-400" height="24" width="24" />
+                </div>
+                <div class="flex-grow">
+                    <form on:submit={handleQuestion}>
+                        <input
+                            bind:value="{question}"
+                            placeholder="I want to ask..."
+                            class="border-gray-300 border-2
+                            appearance-none rounded w-full py-2 px-3
+                            text-gray-700 leading-tight focus:outline-none
+                            focus:bg-white focus:border-orange-500"
+                            id="question"
+                            name="question"
+                            type="text"
+                            required
+                            disabled={retrospective.phase > 1 && !isOwner}
+                            />
+                        <button type="submit" class="hidden" />
+                    </form>
+                </div>
+            </div>
             <div>
                 {#each retrospective.questionItems as item}
                 <div class="py-1 my-1 item-list-item" data-itemType="question" data-itemId="{item.id}">
                     <div class="flex" data-dragdisabled={item.items.length > 0}>
                         <div class="flex-shrink">
                             {#if retrospective.phase === 1 || isOwner}
-                                <button on:click={handleItemDelete('question', item.id)} class="pr-2">X</button>
+                                <button on:click={handleItemDelete('question', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
                             {/if}
                         </div>
                         <div class="flex-grow">
                             <div>{item.content}</div>
                             {#each item.items as child(child.id)}
-                                <div class="pl-4 border-l border-gray-300">
-                                    <button on:click={unnestItem('question', child.id)}>&lt-</button>&nbsp;{child.content}
+                            <div class="flex items-center pl-2 border-l border-gray-300">
+                                <div class="flex-shrink">
+                                    {#if retrospective.phase > 1 && isOwner}
+                                        <button on:click={unnestItem('question', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
+                                    {/if}
                                 </div>
+                                <div class="flex-grow">{child.content}</div>
+                            </div>
                             {/each}
                         </div>
                     </div>
@@ -569,34 +621,47 @@
                 {/each}
             </div>
         </div>
-        <div class="w-1/4 mx-2 p-2  bg-white shadow">
-            <form on:submit={handleActionItem} class="mb-2">
-                <input
-                    bind:value="{actionItem}"
-                    placeholder="Action item..."
-                    class="border-gray-300 border-2
-                    appearance-none rounded w-full py-2 px-3
-                    text-gray-700 leading-tight focus:outline-none
-                    focus:bg-white focus:border-orange-500"
-                    id="actionItem"
-                    name="actionItem"
-                    type="text"
-                    required
-                    disabled={retrospective.phase !== 3}
-                    />
-                <button type="submit" class="hidden" />
-            </form>
-            {#each retrospective.actionItems as item}
+        <div class="w-1/4 mx-2 p-4 bg-white shadow">
+            <div class="flex items-center mb-2">
+                <div class="flex-shrink pr-1">
+                    <CheckCircle class="text-gray-400" height="24" width="24" />
+                </div>
+                <div class="flex-grow">
+                    <form on:submit={handleActionItem}>
+                        <input
+                            bind:value="{actionItem}"
+                            placeholder="Action item..."
+                            class="border-gray-300 border-2
+                            appearance-none rounded w-full py-2 px-3
+                            text-gray-700 leading-tight focus:outline-none
+                            focus:bg-white focus:border-orange-500"
+                            id="actionItem"
+                            name="actionItem"
+                            type="text"
+                            required
+                            disabled={retrospective.phase !== 3}
+                            />
+                        <button type="submit" class="hidden" />
+                    </form>
+                </div>
+            </div>
+            {#each retrospective.actionItems as item, i}
                 <div class="py-1 my-1">
-                    <div class="flex">
+                    <div class="flex content-center">
                         <div class="flex-shrink">
-                            {#if isOwner}<button on:click={handleActionDelete(item.id)}>X</button> {/if}{item.content}
+                            {#if isOwner}
+                                <button on:click={handleActionDelete(item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
+                            {/if}
                         </div>
                         <div class="flex-grow">
-                            <div>{item.content}</div>
+                            {item.content}
                         </div>
                         <div class="flex-shrink">
-                            <input type="checkbox" checked="{item.completed}" on:click={handleActionUpdate(item.id, item.completed)} />
+                            <input type="checkbox" id="{i}Completed" checked="{item.completed}" class="opacity-0 absolute h-6 w-6" on:change={handleActionUpdate(item.id, item.completed)} />
+                            <div class="bg-white border-2 rounded-md border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                                <CheckboxIcon />
+                            </div>
+                            <label for="{i}Completed" class="select-none"></label>
                         </div>
                     </div>
                 </div>

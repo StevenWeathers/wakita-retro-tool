@@ -62,7 +62,7 @@ func (d *Database) GetRetrospectiveActions(RetrospectiveID string) []*Retrospect
 	var actions = make([]*RetrospectiveAction, 0)
 
 	actionRows, actionsErr := d.db.Query(
-		`SELECT id, retrospective_id, content, completed FROM retrospective_action WHERE retrospective_id = $1;`,
+		`SELECT id, retrospective_id, content, completed FROM retrospective_action WHERE retrospective_id = $1 ORDER BY created_date ASC;`,
 		RetrospectiveID,
 	)
 	if actionsErr == nil {
