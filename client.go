@@ -99,6 +99,7 @@ func (s subscription) readPump(srv *server) {
 		}
 
 		var badEvent bool
+		var targetedEvent bool
 		keyVal := make(map[string]string)
 		json.Unmarshal(msg, &keyVal) // check for errors
 		userID := s.userID
@@ -108,6 +109,7 @@ func (s subscription) readPump(srv *server) {
 		case "create_item_worked":
 			var rs struct {
 				Content string `json:"content"`
+				Phase   int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -116,12 +118,17 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
+			}
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
 		case "create_item_improve":
 			var rs struct {
 				Content string `json:"content"`
+				Phase   int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -130,12 +137,17 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
+			}
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
 		case "create_item_question":
 			var rs struct {
 				Content string `json:"content"`
+				Phase   int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -144,12 +156,17 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
+			}
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
 		case "delete_item_worked":
 			var rs struct {
 				ItemID string `json:"id"`
+				Phase  int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -158,12 +175,17 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
+			}
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
 		case "delete_item_improve":
 			var rs struct {
 				ItemID string `json:"id"`
+				Phase  int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -172,12 +194,17 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
+			}
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
 		case "delete_item_question":
 			var rs struct {
 				ItemID string `json:"id"`
+				Phase  int    `json:"phase"`
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
@@ -185,6 +212,10 @@ func (s subscription) readPump(srv *server) {
 			if err != nil {
 				badEvent = true
 				break
+			}
+			if rs.Phase == 1 {
+				targetedEvent = true
+				items = srv.database.FilterItemsByUser(userID, items)
 			}
 
 			updatedItems, _ := json.Marshal(items)
@@ -257,9 +288,13 @@ func (s subscription) readPump(srv *server) {
 		default:
 		}
 
-		if !badEvent {
+		if !badEvent && !targetedEvent {
 			m := message{msg, s.arena}
 			h.broadcast <- m
+		}
+
+		if targetedEvent {
+			c.write(websocket.TextMessage, msg)
 		}
 
 		if forceClosed {
@@ -337,6 +372,11 @@ func (s *server) serveWs() http.HandlerFunc {
 				log.Printf("close error: %v", err)
 			}
 			return
+		}
+		if b.Phase == 1 {
+			b.WorkedItems = s.database.FilterItemsByUser(userID, b.WorkedItems)
+			b.ImproveItems = s.database.FilterItemsByUser(userID, b.ImproveItems)
+			b.QuestionItems = s.database.FilterItemsByUser(userID, b.QuestionItems)
 		}
 		retrospective, _ := json.Marshal(b)
 

@@ -189,7 +189,8 @@
         evt.preventDefault()
 
         sendSocketEvent('create_item_worked', JSON.stringify({
-            content: workedWell
+            content: workedWell,
+            phase: retrospective.phase
         }))
         workedWell = ''
     }
@@ -198,7 +199,8 @@
         evt.preventDefault()
 
         sendSocketEvent('create_item_improve', JSON.stringify({
-            content: needsImprovement
+            content: needsImprovement,
+            phase: retrospective.phase
         }))
         needsImprovement = ''
     }
@@ -207,7 +209,8 @@
         evt.preventDefault()
 
         sendSocketEvent('create_item_question', JSON.stringify({
-            content: question
+            content: question,
+            phase: retrospective.phase
         }))
         question = ''
     }
@@ -223,19 +226,22 @@
 
     const handleWorkedDelete = (id) => () => {
         sendSocketEvent('delete_item_worked', JSON.stringify({
-            id
+            id,
+            phase: retrospective.phase
         }))
     }
     
     const handleImproveDelete = (id) => () => {
         sendSocketEvent('delete_item_improve', JSON.stringify({
-            id
+            id,
+            phase: retrospective.phase
         }))
     }
 
     const handleQuestionDelete = (id) => () => {
         sendSocketEvent('delete_item_question', JSON.stringify({
-            id
+            id,
+            phase: retrospective.phase
         }))
     }
 

@@ -6,6 +6,19 @@ import (
 	"log"
 )
 
+// FilterItemsByUser filters the list of items by userId
+func (d *Database) FilterItemsByUser(UserID string, Items []*RetrospectiveItem) []*RetrospectiveItem {
+	filteredItems := make([]*RetrospectiveItem, 0)
+
+	for _, item := range Items {
+		if item.UserID == UserID {
+			filteredItems = append(filteredItems, item)
+		}
+	}
+
+	return filteredItems
+}
+
 // CreateRetrospectiveItemWorked adds a worked item to the retrospective
 func (d *Database) CreateRetrospectiveItemWorked(RetrospectiveID string, UserID string, Content string) ([]*RetrospectiveItem, error) {
 	var Type string = "worked"
