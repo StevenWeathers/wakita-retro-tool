@@ -244,6 +244,21 @@ func (d *Database) SetRetrospectiveOwner(RetrospectiveID string, userID string, 
 	return retrospective, nil
 }
 
+// RetrospectiveAdvancePhase sets the phase for the retrospective
+func (d *Database) RetrospectiveAdvancePhase(RetrospectiveID string, userID string, Phase int) error {
+	err := d.ConfirmOwner(RetrospectiveID, userID)
+	if err != nil {
+		return errors.New("Incorrect permissions")
+	}
+
+	if _, err := d.db.Exec(
+		`call set_retrospective_phase($1, $2);`, RetrospectiveID, Phase); err != nil {
+		log.Println(err)
+		return errors.New("Unable to advance phase")
+	}
+	return nil
+}
+
 // DeleteRetrospective removes all retrospective associations and the retrospective itself from DB by RetrospectiveID
 func (d *Database) DeleteRetrospective(RetrospectiveID string, userID string) error {
 	err := d.ConfirmOwner(RetrospectiveID, userID)

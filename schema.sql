@@ -219,6 +219,14 @@ BEGIN
 END;
 $$;
 
+-- Set Retrospective Phase --
+CREATE OR REPLACE PROCEDURE set_retrospective_phase(retrospectiveId UUID, nextPhase SMALLINT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE retrospective SET updated_date = NOW(), phase = nextPhase WHERE id = retrospectiveId;
+END;
+$$;
+
 -- Delete Retrospective --
 CREATE OR REPLACE PROCEDURE delete_retrospective(retrospectiveId UUID)
 LANGUAGE plpgsql AS $$

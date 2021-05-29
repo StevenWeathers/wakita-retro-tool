@@ -10,6 +10,7 @@
     import DownCarrotIcon from '../components/icons/DownCarrotIcon.svelte'
     import ChevronRight from '../components/icons/ChevronRight.svelte'
     import DeleteRetrospective from '../components/DeleteRetrospective.svelte'
+    import SolidButton from '../components/SolidButton.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
 
@@ -77,6 +78,9 @@
                 break;
             case 'action_updated':
                 retrospective.actionItems = JSON.parse(parsedEvent.value)
+                break;
+            case 'phase_updated':
+                retrospective.phase =  JSON.parse(parsedEvent.value)
                 break;
             case 'retrospective_conceded':
                 // retrospective over, goodbye.
@@ -241,6 +245,12 @@
         }))
     }
 
+    const advancePhase = () => {
+        sendSocketEvent('advance_phase', JSON.stringify({
+            phase: retrospective.phase + 1
+        }))
+    }
+
     onMount(() => {
         if (!$user.id) {
             router.route(`${appRoutes.login}/${retrospectiveId}`)
@@ -254,14 +264,26 @@
 
 {#if retrospective.name && !socketReconnecting && !socketError}
     <div class="px-6 py-2 bg-gray-100 border-b border-t border-gray-400 flex flex-wrap">
-        <div class="w-1/3">
+        <div class="w-1/4">
             <h1 class="text-3xl font-bold leading-tight">
                 {retrospective.name}
             </h1>
         </div>
-        <div class="w-2/3 text-right">
+        <div class="w-3/4 text-right">
             <div>
                 {#if retrospective.ownerId === $user.id}
+                    {#if retrospective.phase !== 4}
+                        <SolidButton color="blue" onClick={advancePhase}>
+                            {#if retrospective.phase === 1}
+                                Group &amp; Vote comments
+                            {:else if retrospective.phase === 2}
+                                Discuss and add action items
+                            {:else if retrospective.phase === 3}
+                                Finish retro
+                            {/if}
+                        </SolidButton>
+                    {/if}
+
                     <HollowButton
                         color="red"
                         onClick="{toggleDeleteRetrospective}"
@@ -294,7 +316,6 @@
                                     {#if usr.active}
                                         <UserCard
                                             user="{usr}"
-                                            {sendSocketEvent}
                                             showBorder="{index != retrospective.users.length - 1}" />
                                     {/if}
                                 {/each}
@@ -339,7 +360,9 @@
                     id="workedWell"
                     name="workedWell"
                     type="text"
-                    required />
+                    required
+                    disabled={retrospective.phase > 1}
+                    />
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.workedItems as item}
@@ -358,7 +381,8 @@
                     id="needsImprovement"
                     name="needsImprovement"
                     type="text"
-                    required />
+                    required
+                    disabled={retrospective.phase > 1} />
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.improveItems as item}
@@ -377,7 +401,9 @@
                     id="question"
                     name="question"
                     type="text"
-                    required />
+                    required
+                    disabled={retrospective.phase > 1}
+                    />
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.questionItems as item}
@@ -397,11 +423,12 @@
                     name="actionItem"
                     type="text"
                     required
+                    disabled={retrospective.phase !== 3}
                     />
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.actionItems as item}
-                <div><button on:click={handleActionDelete(item.id)}>X</button> {item.content}</div>
+                <div><button on:click={handleActionDelete(item.id)}>X</button> {item.content} <button></button></div>
             {/each}
         </div>
     </div>

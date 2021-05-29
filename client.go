@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -216,6 +217,19 @@ func (s subscription) readPump(srv *server) {
 
 			updatedActions, _ := json.Marshal(actions)
 			msg = CreateSocketEvent("action_updated", string(updatedActions), "")
+		case "advance_phase":
+			var rs struct {
+				Phase int `json:"phase"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			err := srv.database.RetrospectiveAdvancePhase(retrospectiveID, userID, rs.Phase)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			msg = CreateSocketEvent("phase_updated", strconv.Itoa(rs.Phase), "")
 		case "promote_owner":
 			retrospective, err := srv.database.SetRetrospectiveOwner(retrospectiveID, userID, keyVal["value"])
 			if err != nil {
