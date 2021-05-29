@@ -1,6 +1,7 @@
 <script>
     import Sockette from 'sockette'
     import { onMount, onDestroy } from 'svelte'
+    import dragula from 'dragula'
 
     import PageLayout from '../components/PageLayout.svelte'
     import UserCard from '../components/UserCard.svelte'
@@ -18,6 +19,19 @@
     export let notifications
     export let router
     export let eventTag
+
+    let drake = dragula({
+        isContainer: function(el) {
+            return el.classList.contains('item-list-item')
+        },
+        accepts: function (el, target, source) {
+            return source.dataset.itemtype === target.dataset.itemtype && target !== source
+        },
+        invalid: function (el, handle) {
+            const isDisabled = el.dataset.dragdisabled || "false"
+            return isDisabled === "true"
+        }
+    })
 
     const hostname = window.location.origin
     const socketExtension = window.location.protocol === 'https:' ? 'wss' : 'ws'
@@ -257,6 +271,34 @@
         }))
     }
 
+    drake.on('drop', function(el, target, source, sibling) {
+        const itemTypeKey = `${source.dataset.itemtype}Items`
+        const itemId = source.dataset.itemid
+        const parentItemId = target.dataset.itemid
+        const childItem = retrospective[itemTypeKey].find(item => item.id === itemId)
+
+       console.log(`parent ${parentItemId} now has child ${itemId}`)
+
+       // this is temporary to mimic the behavior desired
+       // will implement associating parent and then traversing properly on socket event results
+       retrospective[itemTypeKey] = retrospective[itemTypeKey].reduce((prev, item) => {
+           if (item.id === itemId) {
+               return prev
+           }
+           if (item.id === parentItemId) {
+               item.items = [...(item.items || []), { ...childItem, parentId: parentItemId }]
+           }
+
+           prev.push(item)
+
+           return prev
+       }, [])
+
+       el.remove()
+       
+       console.log(retrospective[itemTypeKey])
+    })
+
     $: isOwner = retrospective.ownerId === $user.id
 
     onMount(() => {
@@ -265,6 +307,35 @@
         }
     })
 </script>
+
+<style>
+    /** Manually including Dragula styles, should automate this later */
+    :global(.gu-mirror) {
+        position: fixed !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+        opacity: 0.8;
+        -ms-filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=80)';
+        filter: alpha(opacity=80);
+    }
+
+    :global(.gu-hide) {
+        display: none !important;
+    }
+
+    :global(.gu-unselectable) {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+    }
+
+    :global(.gu-transit) {
+        opacity: 0.2;
+        -ms-filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=20)';
+        filter: alpha(opacity=20);
+    }
+</style>
 
 <svelte:head>
     <title>Retrospective {retrospective.name} | Wakita</title>
@@ -373,9 +444,21 @@
                     />
                 <button type="submit" class="hidden" />
             </form>
-            {#each retrospective.workedItems as item}
-                <div><button on:click={handleWorkedDelete(item.id)}>X</button> {item.content}</div>
-            {/each}
+            <div>
+                {#each retrospective.workedItems as item(item.id)}
+                    <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="worked" data-itemId="{item.id}">
+                        <div data-dragdisabled={Array.isArray(item.items)}>
+                            <button on:click={handleWorkedDelete(item.id)}>X</button> {item.content}
+
+                            {#each (item.items || []) as child(child.id)}
+                                <div class="pl-8">
+                                    {child.content}
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            </div>
         </div>
         <div class="w-1/4 mx-2 p-2  bg-white shadow">
             <form on:submit={handleNeedsImprovement} class="mb-2">
@@ -393,9 +476,21 @@
                     disabled={retrospective.phase > 1 && !isOwner} />
                 <button type="submit" class="hidden" />
             </form>
-            {#each retrospective.improveItems as item}
-                <div><button on:click={handleImproveDelete(item.id)}>X</button> {item.content}</div>
-            {/each}
+            <div>
+                {#each retrospective.improveItems as item}
+                    <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="improve" data-itemId="{item.id}">
+                        <div data-dragdisabled={Array.isArray(item.items)}>
+                            <button on:click={handleImproveDelete(item.id)}>X</button> {item.content}
+
+                            {#each (item.items || []) as child(child.id)}
+                                <div class="pl-8">
+                                    {child.content}
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            </div>
         </div>
         <div class="w-1/4 mx-2 p-2 bg-white shadow">
             <form on:submit={handleQuestion} class="mb-2">
@@ -414,9 +509,21 @@
                     />
                 <button type="submit" class="hidden" />
             </form>
-            {#each retrospective.questionItems as item}
-                <div><button on:click={handleQuestionDelete(item.id)}>X</button> {item.content}</div>
-            {/each}
+            <div>
+                {#each retrospective.questionItems as item}
+                <div class="py-1 my-1 item-list-item bg-gray-400" data-itemType="question" data-itemId="{item.id}">
+                    <div data-dragdisabled={Array.isArray(item.items)}>
+                        <button on:click={handleQuestionDelete(item.id)}>X</button> {item.content}
+
+                        {#each (item.items || []) as child(child.id)}
+                            <div class="pl-8">
+                                {child.content}
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+                {/each}
+            </div>
         </div>
         <div class="w-1/4 mx-2 p-2  bg-white shadow">
             <form on:submit={handleActionItem} class="mb-2">
