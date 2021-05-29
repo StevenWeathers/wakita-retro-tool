@@ -257,6 +257,8 @@
         }))
     }
 
+    $: isOwner = retrospective.ownerId === $user.id
+
     onMount(() => {
         if (!$user.id) {
             router.route(`${appRoutes.login}/${retrospectiveId}`)
@@ -277,7 +279,7 @@
         </div>
         <div class="w-3/4 text-right">
             <div>
-                {#if retrospective.ownerId === $user.id}
+                {#if isOwner}
                     {#if retrospective.phase !== 4}
                         <SolidButton color="blue" onClick={advancePhase}>
                             {#if retrospective.phase === 1}
@@ -367,7 +369,7 @@
                     name="workedWell"
                     type="text"
                     required
-                    disabled={retrospective.phase > 1}
+                    disabled={retrospective.phase > 1 && !isOwner}
                     />
                 <button type="submit" class="hidden" />
             </form>
@@ -388,7 +390,7 @@
                     name="needsImprovement"
                     type="text"
                     required
-                    disabled={retrospective.phase > 1} />
+                    disabled={retrospective.phase > 1 && !isOwner} />
                 <button type="submit" class="hidden" />
             </form>
             {#each retrospective.improveItems as item}
@@ -408,7 +410,7 @@
                     name="question"
                     type="text"
                     required
-                    disabled={retrospective.phase > 1}
+                    disabled={retrospective.phase > 1 && !isOwner}
                     />
                 <button type="submit" class="hidden" />
             </form>
