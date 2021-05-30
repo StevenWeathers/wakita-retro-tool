@@ -463,7 +463,7 @@
         </div>
 
     </div>
-    <div class="flex p-4 min-h-screen">
+    <div class="flex flex-grow p-4">
         {#if showExport}
             <div class="px-4">
                 <div class="mb-4">

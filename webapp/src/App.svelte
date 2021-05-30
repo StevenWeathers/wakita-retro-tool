@@ -227,6 +227,7 @@
 <Notifications bind:this="{notifications}" />
 
 {#if $isLocaleLoaded}
+<div class="flex flex-col min-h-screen">
     <GlobalAlerts registered="{!!activeUser.name}" />
 
     <nav
@@ -343,4 +344,5 @@
             {$_('appVersion', { values: { version: AppVersion } })}
         </div>
     </footer>
+</div>
 {/if}
