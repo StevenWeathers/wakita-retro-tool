@@ -587,7 +587,7 @@
                                 name="actionItem"
                                 type="text"
                                 required
-                                disabled={retrospective.phase !== 3}
+                                disabled={retrospective.phase !== 3 || !isOwner}
                                 />
                             <button type="submit" class="hidden" />
                         </form>
