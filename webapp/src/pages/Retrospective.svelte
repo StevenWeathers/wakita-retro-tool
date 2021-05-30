@@ -80,17 +80,17 @@
                 break
             case 'item_worked_updated': {
                 const parsedValue = JSON.parse(parsedEvent.value)
-                retrospective.workedItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
+                retrospective.workedItems = nestItems(parsedValue)
                 break;
             }
             case 'item_improve_updated': {
                 const parsedValue = JSON.parse(parsedEvent.value)
-                retrospective.improveItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
+                retrospective.improveItems = nestItems(parsedValue)
                 break;
             }
             case 'item_question_updated': {
                 const parsedValue = JSON.parse(parsedEvent.value)
-                retrospective.questionItems = retrospective.phase !== 1 ? nestItems(parsedValue) : parsedValue
+                retrospective.questionItems = nestItems(parsedValue)
                 break;
             }
             case 'action_updated':
@@ -265,8 +265,8 @@
         const nestedItems = items.reduce((prev, item) => {
             if (item.parentId !== "") {
                 parentMap[item.parentId] = parentMap[item.parentId] || { items: [], voteCount: 0 }
-                parentMap[item.parentId].items.push(item)
                 parentMap[item.parentId].voteCount = parentMap[item.parentId].voteCount + item.votes.length
+                parentMap[item.parentId].items.push(item)
                 return prev
             }
             prev.push(item)
