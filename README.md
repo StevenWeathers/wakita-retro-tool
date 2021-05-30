@@ -11,7 +11,7 @@ Wakita is an open source agile sprint retrospective tool to make sprint retro's 
 
 ### **Uses WebSockets and [Svelte](https://svelte.dev/) frontend framework for a truly Reactive UI experience**
 
-![image](https://user-images.githubusercontent.com/846933/116486097-cfb1ef80-a85a-11eb-9769-96a9b5737ad9.png)
+![image](https://user-images.githubusercontent.com/846933/120089604-0b461080-c0ca-11eb-9931-6569b44d8dbc.png)
 
 # Running in production
 
