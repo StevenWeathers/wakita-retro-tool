@@ -1,13 +1,14 @@
 <script>
     export let width = 16
     export let height = 16
-    export let additionalClasses = ''
+    let klass = ''
+    export { klass as class }
 </script>
 
 <svg
     {width}
     {height}
-    class="fill-current inline {additionalClasses}"
+    class="fill-current inline {klass}"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 640 512">
     <path

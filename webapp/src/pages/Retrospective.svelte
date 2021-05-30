@@ -16,6 +16,7 @@
     import CheckboxIcon from '../components/icons/CheckboxIcon.svelte'
     import CrossCircle from '../components/icons/CrossCircle.svelte'
     import RetroItemForm from '../components/RetroItemForm.svelte'
+    import ArrowUp from '../components/icons/ArrowUp.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
 
@@ -41,6 +42,7 @@
     let showUsers = false
     let showDeleteRetrospective = false
     let actionItem = ''
+    let showExport = false
 
     const onSocketMessage = function(evt) {
         const parsedEvent = JSON.parse(evt.data)
@@ -199,6 +201,10 @@
         showDeleteRetrospective = !showDeleteRetrospective
     }
 
+    const toggleExport = () => {
+        showExport = !showExport
+    }
+
     const handleItemAdd = (type, content) => {
         sendSocketEvent(`create_item_${type}`, JSON.stringify({
             content,
@@ -258,8 +264,9 @@
         const parentMap = {}
         const nestedItems = items.reduce((prev, item) => {
             if (item.parentId !== "") {
-                parentMap[item.parentId] = parentMap[item.parentId] || []
-                parentMap[item.parentId].push(item)
+                parentMap[item.parentId] = parentMap[item.parentId] || { items: [], voteCount: 0 }
+                parentMap[item.parentId].items.push(item)
+                parentMap[item.parentId].voteCount = parentMap[item.parentId].voteCount + item.votes.length
                 return prev
             }
             prev.push(item)
@@ -268,8 +275,10 @@
         }, [])
 
         nestedItems.forEach(item => {
+            item.voteCount = item.votes.length
             if (typeof parentMap[item.id] !== 'undefined') {
-                item.items = parentMap[item.id]
+                item.items = parentMap[item.id].items
+                item.voteCount = item.voteCount + parentMap[item.id].voteCount
             } else {
                 item.items = []
             }
@@ -361,6 +370,15 @@
         </div>
         <div class="w-3/4 text-right">
             <div>
+                {#if retrospective.phase === 4}
+                    <SolidButton color="green" onClick={toggleExport}>
+                        {#if showExport}
+                            Back
+                        {:else}
+                            Export <ArrowUp class="inline-block ml-1" width="12" height="12"/>
+                        {/if}
+                    </SolidButton>
+                {/if}
                 {#if isOwner}
                     {#if retrospective.phase !== 4}
                         <SolidButton color="blue" onClick={advancePhase}>
@@ -377,7 +395,7 @@
                     <HollowButton
                         color="red"
                         onClick="{toggleDeleteRetrospective}"
-                        additionalClasses="mr-2">
+                        class="mr-2">
                         Delete Retrospective
                     </HollowButton>
                 {:else}
@@ -388,14 +406,14 @@
                 <div class="inline-block relative">
                     <HollowButton
                         color="gray"
-                        additionalClasses="transition ease-in-out duration-150"
+                        class="transition ease-in-out duration-150"
                         onClick="{toggleUsersPanel}">
                         <UsersIcon
-                            additionalClasses="mr-1"
+                            class="mr-1"
                             height="18"
                             width="18" />
                         Users
-                        <DownCarrotIcon additionalClasses="ml-1" />
+                        <DownCarrotIcon class="ml-1" />
                     </HollowButton>
                     {#if showUsers}
                         <div
@@ -446,85 +464,158 @@
 
     </div>
     <div class="flex p-4 min-h-screen">
-        <RetroItemForm
-            handleSubmit={handleItemAdd}
-            handleDelete={handleItemDelete}
-            handleVote={voteItem}
-            handleUnnest={unnestItem}
-            itemType="worked"
-            newItemPlaceholder="What worked well..."
-            phase={retrospective.phase}
-            {isOwner}
-            items={retrospective.workedItems}
-        />
-        <RetroItemForm
-            handleSubmit={handleItemAdd}
-            handleDelete={handleItemDelete}
-            handleVote={voteItem}
-            handleUnnest={unnestItem}
-            itemType="improve"
-            newItemPlaceholder="What needs improvement..."
-            phase={retrospective.phase}
-            {isOwner}
-            items={retrospective.improveItems}
-        />
-        <RetroItemForm
-            handleSubmit={handleItemAdd}
-            handleDelete={handleItemDelete}
-            handleVote={voteItem}
-            handleUnnest={unnestItem}
-            itemType="question"
-            newItemPlaceholder="I want to ask..."
-            phase={retrospective.phase}
-            {isOwner}
-            items={retrospective.questionItems}
-        />
-        <div class="w-1/4 mx-2 p-4 bg-white shadow">
-            <div class="flex items-center mb-2">
-                <div class="flex-shrink pr-1">
-                    <CheckCircle class="text-gray-400" height="24" width="24" />
+        {#if showExport}
+            <div class="px-4">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold">Works</h2>
+                    <ul class="pl-12 list-disc">
+                        {#each retrospective.workedItems as item(item.id)}
+                            <li>
+                                {item.content} ({item.voteCount})
+
+                                {#if item.items.length}
+                                    <ul class="pl-8 list-disc">
+                                        {#each item.items as child(child.id)}
+                                            <li>
+                                                {child.content}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
                 </div>
-                <div class="flex-grow">
-                    <form on:submit={handleActionItem}>
-                        <input
-                            bind:value="{actionItem}"
-                            placeholder="Action item..."
-                            class="border-gray-300 border-2
-                            appearance-none rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none
-                            focus:bg-white focus:border-orange-500"
-                            id="actionItem"
-                            name="actionItem"
-                            type="text"
-                            required
-                            disabled={retrospective.phase !== 3}
-                            />
-                        <button type="submit" class="hidden" />
-                    </form>
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold">Needs Improvement</h2>
+                    <ul class="pl-12 list-disc">
+                        {#each retrospective.improveItems as item(item.id)}
+                            <li>
+                                {item.content} ({item.voteCount})
+
+                                {#if item.items.length}
+                                    <ul class="pl-8 list-disc">
+                                        {#each item.items as child(child.id)}
+                                            <li>
+                                                {child.content}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold">Questions</h2>
+                    <ul class="pl-12 list-disc">
+                        {#each retrospective.questionItems as item(item.id)}
+                            <li>
+                                {item.content} ({item.voteCount})
+
+                                {#if item.items.length}
+                                    <ul class="pl-8 list-disc">
+                                        {#each item.items as child(child.id)}
+                                            <li>
+                                                {child.content}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold">Action Items</h2>
+                    <ul class="pl-12 list-disc">
+                        {#each retrospective.actionItems as item(item.id)}
+                            <li>{item.content}</li>
+                        {/each}
+                    </ul>
                 </div>
             </div>
-            {#each retrospective.actionItems as item, i}
-                <div class="py-1 my-1">
-                    <div class="flex content-center">
-                        <div class="flex-shrink">
-                            {#if isOwner}
-                                <button on:click={handleActionDelete(item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
-                            {/if}
-                        </div>
-                        <div class="flex-grow">
-                            {item.content}
-                        </div>
-                        <div class="flex-shrink">
-                            <input type="checkbox" id="{i}Completed" checked="{item.completed}" class="opacity-0 absolute h-6 w-6" on:change={handleActionUpdate(item.id, item.completed)} />
-                            <div class="bg-white border-2 rounded-md border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-                                <CheckboxIcon />
-                            </div>
-                            <label for="{i}Completed" class="select-none"></label>
-                        </div>
+        {:else}
+            <RetroItemForm
+                handleSubmit={handleItemAdd}
+                handleDelete={handleItemDelete}
+                handleVote={voteItem}
+                handleUnnest={unnestItem}
+                itemType="worked"
+                newItemPlaceholder="What worked well..."
+                phase={retrospective.phase}
+                {isOwner}
+                items={retrospective.workedItems}
+            />
+            <RetroItemForm
+                handleSubmit={handleItemAdd}
+                handleDelete={handleItemDelete}
+                handleVote={voteItem}
+                handleUnnest={unnestItem}
+                itemType="improve"
+                newItemPlaceholder="What needs improvement..."
+                phase={retrospective.phase}
+                {isOwner}
+                items={retrospective.improveItems}
+            />
+            <RetroItemForm
+                handleSubmit={handleItemAdd}
+                handleDelete={handleItemDelete}
+                handleVote={voteItem}
+                handleUnnest={unnestItem}
+                itemType="question"
+                newItemPlaceholder="I want to ask..."
+                phase={retrospective.phase}
+                {isOwner}
+                items={retrospective.questionItems}
+            />
+            <div class="w-1/4 mx-2 p-4 bg-white shadow">
+                <div class="flex items-center mb-2">
+                    <div class="flex-shrink pr-1">
+                        <CheckCircle class="text-gray-400" height="24" width="24" />
+                    </div>
+                    <div class="flex-grow">
+                        <form on:submit={handleActionItem}>
+                            <input
+                                bind:value="{actionItem}"
+                                placeholder="Action item..."
+                                class="border-gray-300 border-2
+                                appearance-none rounded w-full py-2 px-3
+                                text-gray-700 leading-tight focus:outline-none
+                                focus:bg-white focus:border-orange-500"
+                                id="actionItem"
+                                name="actionItem"
+                                type="text"
+                                required
+                                disabled={retrospective.phase !== 3}
+                                />
+                            <button type="submit" class="hidden" />
+                        </form>
                     </div>
                 </div>
-            {/each}
-        </div>
+                {#each retrospective.actionItems as item, i}
+                    <div class="py-1 my-1">
+                        <div class="flex content-center">
+                            <div class="flex-shrink">
+                                {#if isOwner}
+                                    <button on:click={handleActionDelete(item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
+                                {/if}
+                            </div>
+                            <div class="flex-grow">
+                                {item.content}
+                            </div>
+                            <div class="flex-shrink">
+                                <input type="checkbox" id="{i}Completed" checked="{item.completed}" class="opacity-0 absolute h-6 w-6" on:change={handleActionUpdate(item.id, item.completed)} />
+                                <div class="bg-white border-2 rounded-md border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                                    <CheckboxIcon />
+                                </div>
+                                <label for="{i}Completed" class="select-none"></label>
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {/if}
     </div>
 {:else}
     <PageLayout>

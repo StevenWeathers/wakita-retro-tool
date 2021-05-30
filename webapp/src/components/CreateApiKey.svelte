@@ -102,7 +102,7 @@
                     <SolidButton
                         color="blue-copy"
                         onClick="{copyKey}"
-                        additionalClasses="flex items-center leading-normal
+                        class="flex items-center leading-normal
                         whitespace-no-wrap text-sm">
                         <ClipboardIcon />
                     </SolidButton>

@@ -1,9 +1,10 @@
 <script>
     export let disabled = false
     export let color = 'green'
-    export let additionalClasses = ''
     export let type = 'button'
     export let onClick = () => {}
+    let klass = ''
+    export { klass as class }
 </script>
 
 <style>
@@ -90,7 +91,7 @@
 <button
     class="btn btn-{color}
     {disabled ? 'disabled' : ''}
-    {additionalClasses}"
+    {klass}"
     on:click="{onClick}"
     {type}
     {disabled}>

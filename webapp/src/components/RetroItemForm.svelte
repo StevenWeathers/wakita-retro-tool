@@ -69,8 +69,8 @@
                             <div class="flex-grow">{item.content}</div>
                             <div class="flex-shrink">
                                 {#if phase > 1}
-                                    <button on:click={handleVote(itemType, item.id)} class="pr-1 text-gray-500 hover:text-green-500" disabled={phase !== 2}><ThumbsUp /></button>
-                                    <span class="text-gray-600">&nbsp;{item.votes.length}</span>
+                                    <button on:click={handleVote(itemType, item.id)} class="pr-1 {phase === 2 ? 'text-gray-500 hover:text-green-500' : 'text-gray-300 cursor-not-allowed'}" disabled={phase !== 2}><ThumbsUp /></button>
+                                    <span class="text-gray-600">&nbsp;{item.voteCount}</span>
                                 {/if}
                             </div>
                         </div>

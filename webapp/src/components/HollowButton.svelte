@@ -1,11 +1,12 @@
 <script>
     export let disabled = false
     export let color = 'green'
-    export let additionalClasses = ''
     export let type = 'button'
     export let onClick = () => {}
     export let href = ''
     export let btnSize = ''
+    let klass = ''
+    export { klass as class }
 
     $: btnSizeClass = btnSize === 'small' ? 'btn-hollow-small' : ''
 </script>
@@ -101,7 +102,7 @@
     <button
         class="btn-hollow {btnSizeClass} btn-hollow-{color}
         {disabled ? 'disabled' : ''}
-        {additionalClasses}"
+        {klass}"
         on:click="{onClick}"
         {type}
         {disabled}>
@@ -110,7 +111,7 @@
 {:else}
     <a
         {href}
-        class="btn-hollow btn-hollow-{color} inline-block no-underline {additionalClasses}">
+        class="btn-hollow btn-hollow-{color} inline-block no-underline {klass}">
         <slot />
     </a>
 {/if}

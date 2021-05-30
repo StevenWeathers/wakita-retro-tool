@@ -1,5 +1,5 @@
 <script>
-    import { appRoutes, PathPrefix } from '../config'
+    import { appRoutes } from '../config'
     import SolidButton from './SolidButton.svelte'
     import ClipboardIcon from './icons/ClipboardIcon.svelte'
 
@@ -29,7 +29,7 @@
         <SolidButton
             color="blue-copy"
             onClick="{copyRetrospectiveLink}"
-            additionalClasses="flex items-center leading-normal
+            class="flex items-center leading-normal
             whitespace-no-wrap text-sm">
             <ClipboardIcon />
         </SolidButton>

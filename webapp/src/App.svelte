@@ -250,14 +250,14 @@
                 <HollowButton
                     color="teal"
                     href="{appRoutes.retrospectives}"
-                    additionalClasses="mr-2">
+                    class="mr-2">
                     My Retro's
                 </HollowButton>
                 {#if activeUser.type !== 'GUEST'}
                     <HollowButton
                         color="blue"
                         href="{appRoutes.organizations}"
-                        additionalClasses="mr-2">
+                        class="mr-2">
                         Organizations &amp; Teams
                     </HollowButton>
                 {/if}
@@ -266,7 +266,7 @@
                         <HollowButton
                             color="orange"
                             href="{appRoutes.register}"
-                            additionalClasses="mr-2">
+                            class="mr-2">
                             Create Account
                         </HollowButton>
                     {/if}
@@ -276,7 +276,7 @@
                         <HollowButton
                             color="purple"
                             href="{appRoutes.admin}"
-                            additionalClasses="mr-2">
+                            class="mr-2">
                             Admin
                         </HollowButton>
                     {/if}
@@ -289,7 +289,7 @@
                     <HollowButton
                         color="orange"
                         href="{appRoutes.register}"
-                        additionalClasses="mr-2">
+                        class="mr-2">
                         Create Account
                     </HollowButton>
                 {/if}
