@@ -5,6 +5,7 @@
     import QuestionCircle from './icons/QuestionCircle.svelte'
     import ThumbsUp from './icons/ThumbsUp.svelte'
     import ArrowLeft from './icons/ArrowLeft.svelte'
+    import { user } from '../stores'
 
     export let handleSubmit = () => {}
     export let handleDelete = () => {}
@@ -56,17 +57,42 @@
         </div>
     </div>
     <div>
-        {#each items as item(item.id)}
+        {#each items as item, i}
             <div class="py-1 my-1 item-list-item" data-itemType="{itemType}" data-itemId="{item.id}">
                 <div class="flex" data-dragdisabled={item.items.length > 0}>
                     <div class="flex-shrink">
-                        {#if phase === 1 || isOwner}
-                            <button on:click={handleDelete(itemType, item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
+                        {#if phase === 1}
+                            <button on:click={handleDelete(itemType, item.id)} class="pr-2 pt-1 {item.userId !== $user.id ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-red-500'}"
+                            disabled="{item.userId !== $user.id}">
+                                <CrossCircle height="18" width="18" />
+                            </button>
+                        {:else if (phase > 1 && isOwner)}
+                            <button on:click={handleDelete(itemType, item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500">
+                                <CrossCircle height="18" width="18" />
+                            </button>
                         {/if}
                     </div>
                     <div class="flex-grow">
                         <div class="flex items-center">
-                            <div class="flex-grow">{item.content}</div>
+                            <div class="flex-grow">
+                                {#if phase === 1 && item.userId !== $user.id}
+                                    {#if i % 2 === 0}
+                                        <div class="text-lg font-bold text-gray-darkest flex">
+                                            <span class="bg-gray-300 h-5 w-1/6 mr-1 inline-block"></span>
+                                            <span class="bg-gray-300 h-5 w-3/6 mr-1 inline-block"></span>
+                                            <span class="bg-gray-300 h-5 w-2/6 inline-block"></span>
+                                        </div>
+                                    {:else}
+                                        <div class="text-lg font-bold text-gray-darkest flex">
+                                            <span class="bg-gray-300 h-5 w-3/6 mr-1 inline-block"></span>
+                                            <span class="bg-gray-300 h-5 w-2/6 mr-1 inline-block"></span>
+                                            <span class="bg-gray-300 h-5 w-1/6 inline-block"></span>
+                                        </div>
+                                    {/if}
+                                {:else}
+                                    {item.content}
+                                {/if}
+                            </div>
                             <div class="flex-shrink">
                                 {#if phase > 1}
                                     <button on:click={handleVote(itemType, item.id)} class="pr-1 {phase === 2 ? 'text-gray-500 hover:text-green-500' : 'text-gray-300 cursor-not-allowed'}" disabled={phase !== 2}><ThumbsUp /></button>

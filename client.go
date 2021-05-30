@@ -117,10 +117,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
@@ -136,10 +136,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
@@ -155,10 +155,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
@@ -303,10 +303,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
@@ -322,10 +322,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
@@ -341,10 +341,10 @@ func (s subscription) readPump(srv *server) {
 				badEvent = true
 				break
 			}
-			if rs.Phase == 1 {
-				targetedEvent = true
-				items = srv.database.FilterItemsByUser(userID, items)
-			}
+			// if rs.Phase == 1 {
+			// 	targetedEvent = true
+			// 	items = srv.database.FilterItemsByUser(userID, items)
+			// }
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
@@ -517,11 +517,11 @@ func (s *server) serveWs() http.HandlerFunc {
 			}
 			return
 		}
-		if b.Phase == 1 {
-			b.WorkedItems = s.database.FilterItemsByUser(userID, b.WorkedItems)
-			b.ImproveItems = s.database.FilterItemsByUser(userID, b.ImproveItems)
-			b.QuestionItems = s.database.FilterItemsByUser(userID, b.QuestionItems)
-		}
+		// if b.Phase == 1 {
+		// 	b.WorkedItems = s.database.FilterItemsByUser(userID, b.WorkedItems)
+		// 	b.ImproveItems = s.database.FilterItemsByUser(userID, b.ImproveItems)
+		// 	b.QuestionItems = s.database.FilterItemsByUser(userID, b.QuestionItems)
+		// }
 		retrospective, _ := json.Marshal(b)
 
 		// make sure user exists
