@@ -24,7 +24,7 @@ func InitConfig() {
 	viper.SetDefault("http.path_prefix", "")
 
 	viper.SetDefault("analytics.enabled", true)
-	viper.SetDefault("analytics.id", "UA-161935945-1")
+	viper.SetDefault("analytics.id", "G-43J3W0QC6P")
 
 	viper.SetDefault("db.host", "db")
 	viper.SetDefault("db.port", 5432)
