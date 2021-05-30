@@ -64,7 +64,7 @@
             <div class="w-full md:w-1/2 px-4">
                 <img
                     class="w-full"
-                    src="https://user-images.githubusercontent.com/846933/116486097-cfb1ef80-a85a-11eb-9769-96a9b5737ad9.png"
+                    src="https://user-images.githubusercontent.com/846933/120089627-2e70c000-c0ca-11eb-932b-0b04135da4d2.png"
                     alt="Preview of Wakita, Agile Sprint Retrospectives UI
                     experience" />
             </div>
@@ -131,10 +131,9 @@
                 <h3 class="text-2xl font-bold">Feature rich retrospectives</h3>
                 <p class="px-2">
                     Team members add "What went well" and "What needs
-                    improvement" then vote on them.
+                    improvement" before grouping and voting on them.
                     <br />
-                    Action items can be added to the Team for future retro
-                    comparison and tracking.
+                    Retrospective leader can add Action Items to track.
                 </p>
             </div>
         </div>

@@ -313,7 +313,6 @@
 
     <footer class="p-6 text-center">
         <GithubIcon />
-        &nbsp;
         <a
             href="https://github.com/StevenWeathers/wakita-retro-tool"
             class="{footerLinkClasses}">
