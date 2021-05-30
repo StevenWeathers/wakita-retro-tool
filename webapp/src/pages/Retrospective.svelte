@@ -12,15 +12,12 @@
     import ChevronRight from '../components/icons/ChevronRight.svelte'
     import DeleteRetrospective from '../components/DeleteRetrospective.svelte'
     import SolidButton from '../components/SolidButton.svelte'
-    import QuestionCircle from '../components/icons/QuestionCircle.svelte'
     import CheckCircle from '../components/icons/CheckCircle.svelte'
-    import SmileCircle from '../components/icons/SmileCircle.svelte'
-    import FrownCircle from '../components/icons/FrownCircle.svelte'
     import CheckboxIcon from '../components/icons/CheckboxIcon.svelte'
+    import CrossCircle from '../components/icons/CrossCircle.svelte'
+    import RetroItemForm from '../components/RetroItemForm.svelte'
     import { appRoutes, PathPrefix } from '../config'
     import { user } from '../stores.js'
-import CrossCircle from '../components/icons/CrossCircle.svelte'
-import ArrowLeft from '../components/icons/ArrowLeft.svelte'
 
     export let retrospectiveId
     export let notifications
@@ -43,10 +40,6 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
     }
     let showUsers = false
     let showDeleteRetrospective = false
-
-    let workedWell = ''
-    let needsImprovement = ''
-    let question = ''
     let actionItem = ''
 
     const onSocketMessage = function(evt) {
@@ -55,11 +48,9 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
         switch (parsedEvent.type) {
             case 'init':
                 retrospective = JSON.parse(parsedEvent.value)
-                if (retrospective.phase !== 1) {
-                    retrospective.workedItems = nestItems(retrospective.workedItems)
-                    retrospective.improveItems = nestItems(retrospective.improveItems)
-                    retrospective.questionItems = nestItems(retrospective.questionItems)
-                }
+                retrospective.workedItems = nestItems(retrospective.workedItems)
+                retrospective.improveItems = nestItems(retrospective.improveItems)
+                retrospective.questionItems = nestItems(retrospective.questionItems)
                 eventTag('join', 'retrospective', '')
                 break
             case 'user_joined': {
@@ -81,6 +72,9 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
             }
             case 'retrospective_updated':
                 retrospective = JSON.parse(parsedEvent.value)
+                retrospective.workedItems = nestItems(retrospective.workedItems)
+                retrospective.improveItems = nestItems(retrospective.improveItems)
+                retrospective.questionItems = nestItems(retrospective.questionItems)
                 break
             case 'item_worked_updated': {
                 const parsedValue = JSON.parse(parsedEvent.value)
@@ -99,9 +93,6 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
             }
             case 'action_updated':
                 retrospective.actionItems = JSON.parse(parsedEvent.value)
-                break;
-            case 'phase_updated':
-                retrospective.phase =  JSON.parse(parsedEvent.value)
                 break;
             case 'retrospective_conceded':
                 // retrospective over, goodbye.
@@ -208,34 +199,11 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
         showDeleteRetrospective = !showDeleteRetrospective
     }
 
-    const handleWorkedWell = (evt) => {
-        evt.preventDefault()
-
-        sendSocketEvent('create_item_worked', JSON.stringify({
-            content: workedWell,
+    const handleItemAdd = (type, content) => {
+        sendSocketEvent(`create_item_${type}`, JSON.stringify({
+            content,
             phase: retrospective.phase
         }))
-        workedWell = ''
-    }
-
-    const handleNeedsImprovement = (evt) => {
-        evt.preventDefault()
-
-        sendSocketEvent('create_item_improve', JSON.stringify({
-            content: needsImprovement,
-            phase: retrospective.phase
-        }))
-        needsImprovement = ''
-    }
-
-    const handleQuestion = (evt) => {
-        evt.preventDefault()
-
-        sendSocketEvent('create_item_question', JSON.stringify({
-            content: question,
-            phase: retrospective.phase
-        }))
-        question = ''
     }
 
     const unnestItem = (type, id) => () => {
@@ -262,9 +230,6 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
     }
 
     const handleActionUpdate = (id, completed) => (evt) => {
-        console.log(id)
-        console.log(completed)
-
         sendSocketEvent('update_action', JSON.stringify({
             id,
             completed: !completed
@@ -280,6 +245,12 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
     const advancePhase = () => {
         sendSocketEvent('advance_phase', JSON.stringify({
             phase: retrospective.phase + 1
+        }))
+    }
+
+    const voteItem = (type, id) => {
+        sendSocketEvent(`vote_item_${type}`, JSON.stringify({
+            id
         }))
     }
 
@@ -323,12 +294,10 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
         }
     })
 
-    drake.on('drop', function(el, target, source, sibling) {
+    drake.on('drop', function(el, target, source) {
         const itemType = source.dataset.itemtype
-        const itemTypeKey = `${itemType}Items`
         const itemId = source.dataset.itemid
         const parentItemId = target.dataset.itemid
-        const childItem = retrospective[itemTypeKey].find(item => item.id === itemId)
 
         el.remove()
         sendSocketEvent(`nest_item_${itemType}`, JSON.stringify({
@@ -454,10 +423,18 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
         </div>
     </div>
     <div class="px-6 py-2 bg-gray-100 border-b border-gray-400 flex flex-wrap">
-        <div class="w-1/3">
-            Brainstorm <ChevronRight class="inline-block" /> Group &amp; Vote <ChevronRight class="inline-block" /> Add action items <ChevronRight class="inline-block" /> Done
+        <div class="w-1/2">
+            <div class="flex items-center text-gray-500">
+                <div class="flex-initial px-1 {retrospective.phase === 1 && 'border-b-2 border-blue-500 text-gray-800'}">Brainstorm</div>
+                <div class="flex-initial px-1"><ChevronRight /></div>
+                <div class="flex-initial px-1 {retrospective.phase === 2 && 'border-b-2 border-blue-500 text-gray-800'}">Group &amp; Vote</div>
+                <div class="flex-initial px-1"><ChevronRight /></div>
+                <div class="flex-initial px-1 {retrospective.phase === 3 && 'border-b-2 border-blue-500 text-gray-800'}">Add action items</div>
+                <div class="flex-initial px-1"><ChevronRight /></div>
+                <div class="flex-initial px-1 {retrospective.phase === 4 && 'border-b-2 border-blue-500 text-gray-800'}">Done</div>
+            </div>
         </div>
-        <div class="w-2/3 text-right text-gray-600">
+        <div class="w-1/2 text-right text-gray-600">
             {#if retrospective.phase === 1}
                 Add your comments below, you won't be able to see your peers until next step
             {:else if retrospective.phase === 2}
@@ -469,158 +446,39 @@ import ArrowLeft from '../components/icons/ArrowLeft.svelte'
 
     </div>
     <div class="flex p-4 min-h-screen">
-        <div class="w-1/4 mx-2 p-4 bg-white shadow">
-            <div class="flex items-center mb-2">
-                <div class="flex-shrink pr-1">
-                    <SmileCircle class="text-gray-400" height="24" width="24" />
-                </div>
-                <div class="flex-grow">
-                    <form on:submit={handleWorkedWell} class="flex">
-                        <input
-                            bind:value="{workedWell}"
-                            placeholder="What worked well..."
-                            class="border-gray-300 border-2
-                            appearance-none rounded py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none
-                            focus:bg-white focus:border-orange-500 w-full"
-                            id="workedWell"
-                            name="workedWell"
-                            type="text"
-                            required
-                            disabled={retrospective.phase > 1 && !isOwner}
-                            />
-                        <button type="submit" class="hidden" />
-                    </form>
-                </div>
-            </div>
-            <div>
-                {#each retrospective.workedItems as item(item.id)}
-                    <div class="py-1 my-1 item-list-item" data-itemType="worked" data-itemId="{item.id}">
-                        <div class="flex" data-dragdisabled={item.items.length > 0}>
-                            <div class="flex-shrink">
-                                {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleItemDelete('worked', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
-                                {/if}
-                            </div>
-                            <div class="flex-grow">
-                                <div>{item.content}</div>
-                                {#each item.items as child(child.id)}
-                                    <div class="flex items-center pl-2 border-l border-gray-300">
-                                        <div class="flex-shrink">
-                                            {#if retrospective.phase > 1 && isOwner}
-                                                <button on:click={unnestItem('worked', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
-                                            {/if}
-                                        </div>
-                                        <div class="flex-grow">{child.content}</div>
-                                    </div>
-                                {/each}
-                            </div>
-                        </div>
-                    </div>
-                {/each}
-            </div>
-        </div>
-        <div class="w-1/4 mx-2 p-4 bg-white shadow">
-            <div class="flex items-center mb-2">
-                <div class="flex-shrink pr-1">
-                    <FrownCircle class="text-gray-400" height="24" width="24" />
-                </div>
-                <div class="flex-grow">
-                    <form on:submit={handleNeedsImprovement}>
-                        <input
-                            bind:value="{needsImprovement}"
-                            placeholder="What needs improvement..."
-                            class="border-gray-300 border-2
-                            appearance-none rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none
-                            focus:bg-white focus:border-orange-500"
-                            id="needsImprovement"
-                            name="needsImprovement"
-                            type="text"
-                            required
-                            disabled={retrospective.phase > 1 && !isOwner} />
-                        <button type="submit" class="hidden" />
-                    </form>
-                </div>
-            </div>
-            <div>
-                {#each retrospective.improveItems as item}
-                    <div class="py-1 my-1 item-list-item" data-itemType="improve" data-itemId="{item.id}">
-                        <div class="flex" data-dragdisabled={item.items.length > 0}>
-                            <div class="flex-shrink">
-                                {#if retrospective.phase === 1 || isOwner}
-                                    <button on:click={handleItemDelete('improve', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
-                                {/if}
-                            </div>
-                            <div class="flex-grow">
-                                <div>{item.content}</div>
-                                {#each item.items as child(child.id)}
-                                    <div class="flex items-center pl-2 border-l border-gray-300">
-                                        <div class="flex-shrink">
-                                            {#if retrospective.phase > 1 && isOwner}
-                                                <button on:click={unnestItem('improve', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
-                                            {/if}
-                                        </div>
-                                        <div class="flex-grow">{child.content}</div>
-                                    </div>
-                                {/each}
-                            </div>
-                        </div>
-                    </div>
-                {/each}
-            </div>
-        </div>
-        <div class="w-1/4 mx-2 p-4 bg-white shadow">
-            <div class="flex items-center mb-2">
-                <div class="flex-shrink pr-1">
-                    <QuestionCircle class="text-gray-400" height="24" width="24" />
-                </div>
-                <div class="flex-grow">
-                    <form on:submit={handleQuestion}>
-                        <input
-                            bind:value="{question}"
-                            placeholder="I want to ask..."
-                            class="border-gray-300 border-2
-                            appearance-none rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none
-                            focus:bg-white focus:border-orange-500"
-                            id="question"
-                            name="question"
-                            type="text"
-                            required
-                            disabled={retrospective.phase > 1 && !isOwner}
-                            />
-                        <button type="submit" class="hidden" />
-                    </form>
-                </div>
-            </div>
-            <div>
-                {#each retrospective.questionItems as item}
-                <div class="py-1 my-1 item-list-item" data-itemType="question" data-itemId="{item.id}">
-                    <div class="flex" data-dragdisabled={item.items.length > 0}>
-                        <div class="flex-shrink">
-                            {#if retrospective.phase === 1 || isOwner}
-                                <button on:click={handleItemDelete('question', item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500"><CrossCircle height="18" width="18" /></button>
-                            {/if}
-                        </div>
-                        <div class="flex-grow">
-                            <div>{item.content}</div>
-                            {#each item.items as child(child.id)}
-                            <div class="flex items-center pl-2 border-l border-gray-300">
-                                <div class="flex-shrink">
-                                    {#if retrospective.phase > 1 && isOwner}
-                                        <button on:click={unnestItem('question', child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
-                                    {/if}
-                                </div>
-                                <div class="flex-grow">{child.content}</div>
-                            </div>
-                            {/each}
-                        </div>
-                    </div>
-                </div>
-                {/each}
-            </div>
-        </div>
+        <RetroItemForm
+            handleSubmit={handleItemAdd}
+            handleDelete={handleItemDelete}
+            handleVote={voteItem}
+            handleUnnest={unnestItem}
+            itemType="worked"
+            newItemPlaceholder="What worked well..."
+            phase={retrospective.phase}
+            {isOwner}
+            items={retrospective.workedItems}
+        />
+        <RetroItemForm
+            handleSubmit={handleItemAdd}
+            handleDelete={handleItemDelete}
+            handleVote={voteItem}
+            handleUnnest={unnestItem}
+            itemType="improve"
+            newItemPlaceholder="What needs improvement..."
+            phase={retrospective.phase}
+            {isOwner}
+            items={retrospective.improveItems}
+        />
+        <RetroItemForm
+            handleSubmit={handleItemAdd}
+            handleDelete={handleItemDelete}
+            handleVote={voteItem}
+            handleUnnest={unnestItem}
+            itemType="question"
+            newItemPlaceholder="I want to ask..."
+            phase={retrospective.phase}
+            {isOwner}
+            items={retrospective.questionItems}
+        />
         <div class="w-1/4 mx-2 p-4 bg-white shadow">
             <div class="flex items-center mb-2">
                 <div class="flex-shrink pr-1">

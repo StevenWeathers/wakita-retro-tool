@@ -8,10 +8,17 @@
 
 <style>
     .btn {
-        @apply leading-tight py-2 px-3 rounded font-bold text-white border;
+        @apply leading-tight;
+        @apply py-2;
+        @apply px-3;
+        @apply rounded;
+        @apply font-bold;
+        @apply text-white;
+        @apply border;
     }
     .btn.disabled {
-        @apply opacity-50 cursor-not-allowed;
+        @apply opacity-50;
+        @apply cursor-not-allowed;
     }
     .btn-green {
         @apply bg-green-500;
@@ -54,7 +61,9 @@
         @apply border-teal-600;
     }
     .btn-blue-copy {
-        @apply bg-blue-500 rounded-l-none border-blue-800;
+        @apply bg-blue-500;
+        @apply rounded-l-none;
+        @apply border-blue-800;
     }
     .btn-blue-copy:hover {
         @apply bg-blue-600;

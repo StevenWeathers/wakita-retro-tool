@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -192,6 +191,20 @@ func (s subscription) readPump(srv *server) {
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
+		case "vote_item_worked":
+			var rs struct {
+				ItemID string `json:"id"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			items, _, _, err := srv.database.VoteRetrospectiveItem(retrospectiveID, userID, rs.ItemID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_worked_updated", string(updatedItems), "")
 		case "nest_item_improve":
 			var rs struct {
 				ItemID   string `json:"id"`
@@ -221,6 +234,20 @@ func (s subscription) readPump(srv *server) {
 
 			updatedItems, _ := json.Marshal(items)
 			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
+		case "vote_item_improve":
+			var rs struct {
+				ItemID string `json:"id"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			_, items, _, err := srv.database.VoteRetrospectiveItem(retrospectiveID, userID, rs.ItemID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_improve_updated", string(updatedItems), "")
 		case "nest_item_question":
 			var rs struct {
 				ItemID   string `json:"id"`
@@ -243,6 +270,20 @@ func (s subscription) readPump(srv *server) {
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
 			_, _, items, err := srv.database.UnNestRetrospectiveItem(retrospectiveID, userID, rs.ItemID)
+			if err != nil {
+				badEvent = true
+				break
+			}
+
+			updatedItems, _ := json.Marshal(items)
+			msg = CreateSocketEvent("item_question_updated", string(updatedItems), "")
+		case "vote_item_question":
+			var rs struct {
+				ItemID string `json:"id"`
+			}
+			json.Unmarshal([]byte(keyVal["value"]), &rs)
+
+			_, _, items, err := srv.database.VoteRetrospectiveItem(retrospectiveID, userID, rs.ItemID)
 			if err != nil {
 				badEvent = true
 				break
@@ -356,13 +397,14 @@ func (s subscription) readPump(srv *server) {
 			}
 			json.Unmarshal([]byte(keyVal["value"]), &rs)
 
-			err := srv.database.RetrospectiveAdvancePhase(retrospectiveID, userID, rs.Phase)
+			retro, err := srv.database.RetrospectiveAdvancePhase(retrospectiveID, userID, rs.Phase)
 			if err != nil {
 				badEvent = true
 				break
 			}
 
-			msg = CreateSocketEvent("phase_updated", strconv.Itoa(rs.Phase), "")
+			updatedRetrospective, _ := json.Marshal(retro)
+			msg = CreateSocketEvent("retrospective_updated", string(updatedRetrospective), "")
 		case "promote_owner":
 			retrospective, err := srv.database.SetRetrospectiveOwner(retrospectiveID, userID, keyVal["value"])
 			if err != nil {

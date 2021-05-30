@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS retrospective_item (
     user_id UUID,
     parent_id UUID,
     content TEXT NOT NULL,
-    votes JSONB DEFAULT '[]'::JSONB,
+    votes UUID[] DEFAULT '{}',
     type VARCHAR(16) NOT NULL,
     created_date TIMESTAMP DEFAULT NOW(),
     updated_date TIMESTAMP DEFAULT NOW(),
@@ -379,6 +379,19 @@ BEGIN
     SET name = userName, avatar = userAvatar, country = userCountry, company = userCompany, job_title = userJobTitle, last_active = NOW(), updated_date = NOW()
     WHERE id = userId;
     REFRESH MATERIALIZED VIEW active_countries;
+END;
+$$;
+
+-- Adds a vote to retrospective item --
+CREATE OR REPLACE PROCEDURE vote_retrospective_item(
+    itemId UUID,
+    userId UUID
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE retrospective_item
+    SET votes = ARRAY(SELECT DISTINCT UNNEST(votes || CONCAT('{', userId, '}')::UUID[])), updated_date = NOW()
+    WHERE id = itemId;
 END;
 $$;
 

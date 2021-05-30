@@ -2,9 +2,10 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"log"
+
+	"github.com/lib/pq"
 )
 
 // FilterItemsByUser filters the list of items by userId
@@ -105,6 +106,18 @@ func (d *Database) UnNestRetrospectiveItem(RetrospectiveID string, userID string
 	return workedItems, improveItems, questionItems, nil
 }
 
+// VoteRetrospectiveItem votes for a retrospective item
+func (d *Database) VoteRetrospectiveItem(RetrospectiveID string, userID string, ItemID string) (WorkedItems []*RetrospectiveItem, ImproveItems []*RetrospectiveItem, QuestionItems []*RetrospectiveItem, DeleteError error) {
+	if _, err := d.db.Exec(
+		`call vote_retrospective_item($1, $2);`, ItemID, userID); err != nil {
+		log.Println(err)
+	}
+
+	workedItems, improveItems, questionItems := d.GetRetrospectiveItems(RetrospectiveID)
+
+	return workedItems, improveItems, questionItems, nil
+}
+
 // DeleteRetrospectiveItem removes a item from the current board by ID
 func (d *Database) DeleteRetrospectiveItem(RetrospectiveID string, userID string, ItemID string) (WorkedItems []*RetrospectiveItem, ImproveItems []*RetrospectiveItem, QuestionItems []*RetrospectiveItem, DeleteError error) {
 	if _, err := d.db.Exec(
@@ -130,7 +143,6 @@ func (d *Database) GetRetrospectiveItems(RetrospectiveID string) (Worked []*Retr
 	if itemsErr == nil {
 		defer itemRows.Close()
 		for itemRows.Next() {
-			var votes string
 			var parentId sql.NullString
 			var ri = &RetrospectiveItem{
 				ID:              "",
@@ -141,14 +153,10 @@ func (d *Database) GetRetrospectiveItems(RetrospectiveID string) (Worked []*Retr
 				Type:            "",
 				Votes:           make([]string, 0),
 			}
-			if err := itemRows.Scan(&ri.ID, &ri.RetrospectiveID, &ri.UserID, &parentId, &ri.Content, &votes, &ri.Type); err != nil {
+			if err := itemRows.Scan(&ri.ID, &ri.RetrospectiveID, &ri.UserID, &parentId, &ri.Content, pq.Array(&ri.Votes), &ri.Type); err != nil {
 				log.Println(err)
 			} else {
 				ri.ParentID = parentId.String
-				jsonErr := json.Unmarshal([]byte(votes), &ri.Votes)
-				if jsonErr != nil {
-					log.Println(jsonErr)
-				}
 				if ri.Type == "worked" {
 					itemsWorked = append(itemsWorked, ri)
 				}
