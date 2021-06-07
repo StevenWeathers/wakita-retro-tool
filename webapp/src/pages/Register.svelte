@@ -3,7 +3,7 @@
     import SolidButton from '../components/SolidButton.svelte'
     import UserRegisterForm from '../components/UserRegisterForm.svelte'
     import { user } from '../stores.js'
-    import { validateName, validatePasswords } from '../validationUtils.js'
+    import { validateName } from '../validationUtils.js'
     import { appRoutes } from '../config'
 
     export let xfetch
@@ -97,8 +97,15 @@
 <PageLayout>
     <div class="text-center px-2 mb-4">
         <h1 class="text-3xl md:text-4xl font-bold">
-            Register to Create Retrospectives
+            Register
         </h1>
+        {#if retrospectiveId}
+            <div
+                class="font-bold text-m md:text-l mb-2 md:mb-6
+                md:leading-tight text-center">
+                or <a href="${appRoutes.login}/${retrospectiveId}" class="font-bold text-blue-500 hover:text-blue-800">Login</a> to join Retrospective.
+            </div>
+        {/if}
     </div>
     <div class="flex flex-wrap">
         {#if !$user.id && guestsAllowed && registrationAllowed}

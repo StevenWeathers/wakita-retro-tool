@@ -25,6 +25,9 @@
     export let router
     export let eventTag
 
+    const { AllowRegistration } = appConfig
+    const loginOrRegister = AllowRegistration ? appRoutes.register : appRoutes.login
+
     const hostname = window.location.origin
     const socketExtension = window.location.protocol === 'https:' ? 'wss' : 'ws'
 
@@ -317,7 +320,7 @@
 
     onMount(() => {
         if (!$user.id) {
-            router.route(`${appRoutes.login}/${retrospectiveId}`)
+            router.route(`${loginOrRegister}/${retrospectiveId}`)
         }
     })
 </script>
