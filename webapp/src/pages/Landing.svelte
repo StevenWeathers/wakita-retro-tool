@@ -191,7 +191,8 @@
                                 Poker tool"
                                 class="inline-block mx-2 mb-1"
                                 height="60" />
-                        </a><br />
+                        </a>
+                        <br />
                         Agile Poker Planning
                     </div>
                     <div class="flex-initial px-4">
@@ -199,10 +200,11 @@
                             <img
                                 src="/img/exothermic-logo.png"
                                 alt="Exothermic logo"
-                                title="Exothermic - Open Source Agile Story Mapping
-                                tool"
+                                title="Exothermic - Open Source Agile Story
+                                Mapping tool"
                                 class="inline-block mx-2 mb-1" />
-                        </a><br />
+                        </a>
+                        <br />
                         Agile Story Mapping
                     </div>
                 </div>

@@ -229,42 +229,68 @@
 <Notifications bind:this="{notifications}" />
 
 {#if $isLocaleLoaded}
-<div class="flex flex-col min-h-screen">
-    <GlobalAlerts registered="{!!activeUser.name}" />
+    <div class="flex flex-col min-h-screen">
+        <GlobalAlerts registered="{!!activeUser.name}" />
 
-    <nav
-        class="flex items-center justify-between flex-wrap px-6 py-2 bg-white"
-        role="navigation"
-        aria-label="main navigation">
-        <div class="flex items-center flex-shrink-0 mr-6">
-            <a href="{appRoutes.landing}">
-                <img
-                    src="{PathPrefix}/img/wakita-logo.png"
-                    alt="Wakita"
-                    class="nav-logo" />
-            </a>
-        </div>
-        <div class="text-right mt-4 md:mt-0">
-            {#if activeUser.name}
-                <span class="font-bold mr-2 text-xl">
-                    <UserIcon />
-                    <a href="{appRoutes.profile}">{activeUser.name}</a>
-                </span>
-                <HollowButton
-                    color="teal"
-                    href="{appRoutes.retrospectives}"
-                    class="mr-2">
-                    My Retro's
-                </HollowButton>
-                {#if activeUser.type !== 'GUEST'}
+        <nav
+            class="flex items-center justify-between flex-wrap px-6 py-2
+            bg-white"
+            role="navigation"
+            aria-label="main navigation">
+            <div class="flex items-center flex-shrink-0 mr-6">
+                <a href="{appRoutes.landing}">
+                    <img
+                        src="{PathPrefix}/img/wakita-logo.png"
+                        alt="Wakita"
+                        class="nav-logo" />
+                </a>
+            </div>
+            <div class="text-right mt-4 md:mt-0">
+                {#if activeUser.name}
+                    <span class="font-bold mr-2 text-xl">
+                        <UserIcon />
+                        <a href="{appRoutes.profile}">{activeUser.name}</a>
+                    </span>
                     <HollowButton
-                        color="blue"
-                        href="{appRoutes.organizations}"
+                        color="teal"
+                        href="{appRoutes.retrospectives}"
                         class="mr-2">
-                        Organizations &amp; Teams
+                        My Retro's
                     </HollowButton>
-                {/if}
-                {#if !activeUser.type || activeUser.type === 'GUEST'}
+                    {#if activeUser.type !== 'GUEST'}
+                        <HollowButton
+                            color="blue"
+                            href="{appRoutes.organizations}"
+                            class="mr-2">
+                            Organizations &amp; Teams
+                        </HollowButton>
+                    {/if}
+                    {#if !activeUser.type || activeUser.type === 'GUEST'}
+                        {#if AllowRegistration}
+                            <HollowButton
+                                color="orange"
+                                href="{appRoutes.register}"
+                                class="mr-2">
+                                Create Account
+                            </HollowButton>
+                        {/if}
+                        <HollowButton href="{appRoutes.login}">
+                            Login
+                        </HollowButton>
+                    {:else}
+                        {#if activeUser.type === 'ADMIN'}
+                            <HollowButton
+                                color="purple"
+                                href="{appRoutes.admin}"
+                                class="mr-2">
+                                Admin
+                            </HollowButton>
+                        {/if}
+                        <HollowButton color="red" onClick="{logoutUser}">
+                            Logout
+                        </HollowButton>
+                    {/if}
+                {:else}
                     {#if AllowRegistration}
                         <HollowButton
                             color="orange"
@@ -274,78 +300,55 @@
                         </HollowButton>
                     {/if}
                     <HollowButton href="{appRoutes.login}">Login</HollowButton>
-                {:else}
-                    {#if activeUser.type === 'ADMIN'}
-                        <HollowButton
-                            color="purple"
-                            href="{appRoutes.admin}"
-                            class="mr-2">
-                            Admin
-                        </HollowButton>
-                    {/if}
-                    <HollowButton color="red" onClick="{logoutUser}">
-                        Logout
-                    </HollowButton>
                 {/if}
-            {:else}
-                {#if AllowRegistration}
-                    <HollowButton
-                        color="orange"
-                        href="{appRoutes.register}"
-                        class="mr-2">
-                        Create Account
-                    </HollowButton>
-                {/if}
-                <HollowButton href="{appRoutes.login}">Login</HollowButton>
-            {/if}
-            <LocaleSwitcher
-                class="ml-2"
-                selectedLocale="{$locale}"
-                on:locale-changed="{e => setupI18n({
-                        withLocale: e.detail,
-                    })}" />
-        </div>
-    </nav>
+                <LocaleSwitcher
+                    class="ml-2"
+                    selectedLocale="{$locale}"
+                    on:locale-changed="{e => setupI18n({
+                            withLocale: e.detail,
+                        })}" />
+            </div>
+        </nav>
 
-    <svelte:component
-        this="{currentPage.route}"
-        {...currentPage.params}
-        {notifications}
-        {router}
-        {eventTag}
-        {xfetch} />
+        <svelte:component
+            this="{currentPage.route}"
+            {...currentPage.params}
+            {notifications}
+            {router}
+            {eventTag}
+            {xfetch} />
 
-    <footer class="p-6 text-center">
-        <GithubIcon />
-        <a
-            href="https://github.com/StevenWeathers/wakita-retro-tool"
-            class="{footerLinkClasses}">
-            {$_('appName')}
-        </a>
-        {@html $_('footer.authoredBy', {
-            values: {
-                authorOpen: `<a href="http://stevenweathers.com" class="${footerLinkClasses}">`,
-                authorClose: `</a>`,
-            },
-        })}
-        {@html $_('footer.license', {
-            values: {
-                licenseOpen: `<a href="http://www.apache.org/licenses/" class="${footerLinkClasses}">`,
-                licenseClose: `</a>`,
-            },
-        })}
-        <br />
-        {@html $_('footer.poweredBy', {
-            values: {
-                svelteOpen: `<a href="https://svelte.dev/" class="${footerLinkClasses}">`,
-                svelteClose: `</a>`,
-                goOpen: `<a href="https://golang.org/" class="${footerLinkClasses}">`,
-                goClose: `</a>`,
-            },
-        })}
-        <div class="text-sm text-gray-500">
-            {$_('appVersion', { values: { version: AppVersion } })}
-        </div>
-    </footer>
-</div>
+        <footer class="p-6 text-center">
+            <GithubIcon />
+            <a
+                href="https://github.com/StevenWeathers/wakita-retro-tool"
+                class="{footerLinkClasses}">
+                {$_('appName')}
+            </a>
+            {@html $_('footer.authoredBy', {
+                values: {
+                    authorOpen: `<a href="http://stevenweathers.com" class="${footerLinkClasses}">`,
+                    authorClose: `</a>`,
+                },
+            })}
+            {@html $_('footer.license', {
+                values: {
+                    licenseOpen: `<a href="http://www.apache.org/licenses/" class="${footerLinkClasses}">`,
+                    licenseClose: `</a>`,
+                },
+            })}
+            <br />
+            {@html $_('footer.poweredBy', {
+                values: {
+                    svelteOpen: `<a href="https://svelte.dev/" class="${footerLinkClasses}">`,
+                    svelteClose: `</a>`,
+                    goOpen: `<a href="https://golang.org/" class="${footerLinkClasses}">`,
+                    goClose: `</a>`,
+                },
+            })}
+            <div class="text-sm text-gray-500">
+                {$_('appVersion', { values: { version: AppVersion } })}
+            </div>
+        </footer>
+    </div>
 {/if}

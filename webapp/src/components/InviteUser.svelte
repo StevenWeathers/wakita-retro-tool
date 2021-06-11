@@ -29,8 +29,7 @@
         <SolidButton
             color="blue-copy"
             onClick="{copyRetrospectiveLink}"
-            class="flex items-center leading-normal
-            whitespace-no-wrap text-sm">
+            class="flex items-center leading-normal whitespace-no-wrap text-sm">
             <ClipboardIcon />
         </SolidButton>
     </div>

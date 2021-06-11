@@ -18,7 +18,7 @@
     export let isOwner = false
     export let items = []
 
-    const handleFormSubmit = (evt) => {
+    const handleFormSubmit = evt => {
         evt.preventDefault()
 
         handleSubmit(itemType, content)
@@ -38,36 +38,42 @@
             {/if}
         </div>
         <div class="flex-grow">
-            <form on:submit={handleFormSubmit} class="flex">
+            <form on:submit="{handleFormSubmit}" class="flex">
                 <input
                     bind:value="{content}"
                     placeholder="{newItemPlaceholder}"
-                    class="border-gray-300 border-2
-                    appearance-none rounded py-2 px-3
-                    text-gray-700 leading-tight focus:outline-none
+                    class="border-gray-300 border-2 appearance-none rounded py-2
+                    px-3 text-gray-700 leading-tight focus:outline-none
                     focus:bg-white focus:border-orange-500 w-full"
                     id="new{itemType}"
                     name="new{itemType}"
                     type="text"
                     required
-                    disabled={phase > 1 && !isOwner}
-                    />
-                <button type="submit" class="hidden" />
+                    disabled="{phase > 1 && !isOwner}" />
+                <button type="submit" class="hidden"></button>
             </form>
         </div>
     </div>
     <div>
         {#each items as item, i}
-            <div class="py-1 my-1 item-list-item" data-itemType="{itemType}" data-itemId="{item.id}">
-                <div class="flex" data-dragdisabled={item.items.length > 0}>
+            <div
+                class="py-1 my-1 item-list-item"
+                data-itemType="{itemType}"
+                data-itemId="{item.id}">
+                <div class="flex" data-dragdisabled="{item.items.length > 0}">
                     <div class="flex-shrink">
                         {#if phase === 1}
-                            <button on:click={handleDelete(itemType, item.id)} class="pr-2 pt-1 {item.userId !== $user.id ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-red-500'}"
-                            disabled="{item.userId !== $user.id}">
+                            <button
+                                on:click="{handleDelete(itemType, item.id)}"
+                                class="pr-2 pt-1 {item.userId !== $user.id ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-red-500'}"
+                                disabled="{item.userId !== $user.id}">
                                 <CrossCircle height="18" width="18" />
                             </button>
-                        {:else if (phase > 1 && isOwner)}
-                            <button on:click={handleDelete(itemType, item.id)} class="pr-2 pt-1 text-gray-500 hover:text-red-500">
+                        {:else if phase > 1 && isOwner}
+                            <button
+                                on:click="{handleDelete(itemType, item.id)}"
+                                class="pr-2 pt-1 text-gray-500
+                                hover:text-red-500">
                                 <CrossCircle height="18" width="18" />
                             </button>
                         {/if}
@@ -77,34 +83,62 @@
                             <div class="flex-grow">
                                 {#if phase === 1 && item.userId !== $user.id}
                                     {#if i % 2 === 0}
-                                        <div class="text-lg font-bold text-gray-darkest flex">
-                                            <span class="bg-gray-300 h-5 w-1/6 mr-1 inline-block"></span>
-                                            <span class="bg-gray-300 h-5 w-3/6 mr-1 inline-block"></span>
-                                            <span class="bg-gray-300 h-5 w-2/6 inline-block"></span>
+                                        <div
+                                            class="text-lg font-bold
+                                            text-gray-darkest flex">
+                                            <span
+                                                class="bg-gray-300 h-5 w-1/6
+                                                mr-1 inline-block"></span>
+                                            <span
+                                                class="bg-gray-300 h-5 w-3/6
+                                                mr-1 inline-block"></span>
+                                            <span
+                                                class="bg-gray-300 h-5 w-2/6
+                                                inline-block"></span>
                                         </div>
                                     {:else}
-                                        <div class="text-lg font-bold text-gray-darkest flex">
-                                            <span class="bg-gray-300 h-5 w-3/6 mr-1 inline-block"></span>
-                                            <span class="bg-gray-300 h-5 w-2/6 mr-1 inline-block"></span>
-                                            <span class="bg-gray-300 h-5 w-1/6 inline-block"></span>
+                                        <div
+                                            class="text-lg font-bold
+                                            text-gray-darkest flex">
+                                            <span
+                                                class="bg-gray-300 h-5 w-3/6
+                                                mr-1 inline-block"></span>
+                                            <span
+                                                class="bg-gray-300 h-5 w-2/6
+                                                mr-1 inline-block"></span>
+                                            <span
+                                                class="bg-gray-300 h-5 w-1/6
+                                                inline-block"></span>
                                         </div>
                                     {/if}
-                                {:else}
-                                    {item.content}
-                                {/if}
+                                {:else}{item.content}{/if}
                             </div>
                             <div class="flex-shrink">
                                 {#if phase > 1}
-                                    <button on:click={handleVote(itemType, item.id)} class="pr-1 {phase === 2 ? 'text-gray-500 hover:text-green-500' : 'text-gray-300 cursor-not-allowed'}" disabled={phase !== 2}><ThumbsUp /></button>
-                                    <span class="text-gray-600">&nbsp;{item.voteCount}</span>
+                                    <button
+                                        on:click="{handleVote(itemType, item.id)}"
+                                        class="pr-1 {phase === 2 ? 'text-gray-500 hover:text-green-500' : 'text-gray-300 cursor-not-allowed'}"
+                                        disabled="{phase !== 2}">
+                                        <ThumbsUp />
+                                    </button>
+                                    <span class="text-gray-600">
+                                        &nbsp;{item.voteCount}
+                                    </span>
                                 {/if}
                             </div>
                         </div>
-                        {#each item.items as child(child.id)}
-                            <div class="flex items-center pl-2 pt-1 border-l border-gray-300">
+                        {#each item.items as child (child.id)}
+                            <div
+                                class="flex items-center pl-2 pt-1 border-l
+                                border-gray-300">
                                 <div class="flex-shrink">
                                     {#if phase > 1 && isOwner}
-                                        <button on:click={handleUnnest(itemType, child.id)} class="pr-1 text-gray-500 hover:text-green-500"><ArrowLeft /></button>
+                                        <button
+                                            on:click="{handleUnnest(itemType, child.id)}"
+                                            class="pr-1 text-gray-500
+                                            hover:text-green-500">
+                                            <ArrowLeft />
+                                        </button>
                                     {/if}
                                 </div>
                                 <div class="flex-grow">{child.content}</div>
