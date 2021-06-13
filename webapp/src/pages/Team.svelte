@@ -199,6 +199,10 @@
         teamRole !== ''
 </script>
 
+<svelte:head>
+    <title>Team {team.name} | Wakita</title>
+</svelte:head>
+
 <PageLayout>
     <h1 class="text-3xl font-bold">Team: {team.name}</h1>
     {#if organizationId}

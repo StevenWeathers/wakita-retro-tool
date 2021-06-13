@@ -31,6 +31,10 @@
     })
 </script>
 
+<svelte:head>
+    <title>Your Retrospectives | Wakita</title>
+</svelte:head>
+
 <PageLayout>
     <h1 class="mb-4 text-3xl font-bold">My Retrospectives</h1>
 

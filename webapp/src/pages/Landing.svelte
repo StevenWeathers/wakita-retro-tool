@@ -22,6 +22,10 @@
     }
 </style>
 
+<svelte:head>
+    <title>Wakita - Open Source Agile Sprint Retrospective Tool</title>
+</svelte:head>
+
 <section class="bg-brand-color">
     <div class="container mx-auto px-4 py-6 lg:py-10">
         <div class="flex flex-wrap items-center -mx-4">
