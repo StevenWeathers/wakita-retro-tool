@@ -1,5 +1,6 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
+project_name: wakita-retro-tool
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -9,16 +10,46 @@ before:
     # Build dependencies
     - make build-deps
 builds:
-- env:
-  - CGO_ENABLED=0
+  - env: [CGO_ENABLED=0]
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
 dockers:
-    - 
+    - image_templates: ["stevenweathers/wakita-retro-tool:{{ .Tag }}-amd64"]
       dockerfile: "build/gorDockerfile"
-      binaries:
-      - wakita-retro-tool
+      use_buildx: true
+      build_flag_templates:
+      - --platform=linux/amd64
+    - image_templates: ["stevenweathers/wakita-retro-tool:{{ .Tag }}-arm64v8"]
+      goarch: arm64
+      dockerfile: "build/gorDockerfile"
+      use_buildx: true
+      build_flag_templates:
+      - --platform=linux/arm64/v8
+    - image_templates: ["stevenweathers/wakita-retro-tool:latest-amd64"]
+      dockerfile: "build/gorDockerfile"
+      use_buildx: true
+      build_flag_templates:
+      - --platform=linux/amd64
+    - image_templates: ["stevenweathers/wakita-retro-tool:latest-arm64v8"]
+      goarch: arm64
+      dockerfile: "build/gorDockerfile"
+      use_buildx: true
+      build_flag_templates:
+      - --platform=linux/arm64/v8
+docker_manifests:
+    - name_template: stevenweathers/wakita-retro-tool:latest
       image_templates:
-      - "stevenweathers/wakita-retro-tool:{{ .Tag }}"
-      - "stevenweathers/wakita-retro-tool:latest"
+      - stevenweathers/wakita-retro-tool:latest-amd64
+      - stevenweathers/wakita-retro-tool:latest-arm64v8
+    - name_template: stevenweathers/wakita-retro-tool:{{ .Tag }}
+      image_templates:
+      - stevenweathers/wakita-retro-tool:{{ .Tag }}-amd64
+      - stevenweathers/wakita-retro-tool:{{ .Tag }}-arm64v8
 archives:
 - replacements:
     darwin: Darwin
