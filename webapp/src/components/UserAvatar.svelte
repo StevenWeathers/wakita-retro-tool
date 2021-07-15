@@ -1,6 +1,8 @@
 <script>
     import { _ } from '../i18n'
 
+    const { PathPrefix } = appConfig
+
     export let avatarService = ''
     export let userId = ''
     export let avatar = ''
@@ -20,7 +22,7 @@
         src="https://robohash.org/{userId}.png?set={avatar}&size={width}x{width}"
         alt="{$_('avatarAltText')}" />
 {:else if avatarService === 'govatar'}
-    <img src="/avatar/{width}/{userId}/{avatar}" alt="{$_('avatarAltText')}" />
+    <img src="{PathPrefix}/avatar/{width}/{userId}/{avatar}" alt="{$_('avatarAltText')}" />
 {:else if avatarService === 'goadorable'}
-    <img src="/avatar/{width}/{userId}" alt="{$_('avatarAltText')}" />
+    <img src="{PathPrefix}/avatar/{width}/{userId}" alt="{$_('avatarAltText')}" />
 {/if}

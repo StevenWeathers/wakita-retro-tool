@@ -9,7 +9,7 @@
     export let xfetch
     export let eventTag
 
-    const { ShowActiveCountries } = appConfig
+    const { ShowActiveCountries, PathPrefix } = appConfig
 </script>
 
 <style>
@@ -189,7 +189,7 @@
                     <div class="flex-initial px-4">
                         <a href="https://thunderdome.dev">
                             <img
-                                src="/img/thunderdome-logo.png"
+                                src="{PathPrefix}/img/thunderdome-logo.png"
                                 alt="Thunderdome logo"
                                 title="Thunderdome - Open Source Agile Planning
                                 Poker tool"
@@ -202,7 +202,7 @@
                     <div class="flex-initial px-4">
                         <a href="https://exothermic.dev">
                             <img
-                                src="/img/exothermic-logo.png"
+                                src="{PathPrefix}/img/exothermic-logo.png"
                                 alt="Exothermic logo"
                                 title="Exothermic - Open Source Agile Story
                                 Mapping tool"
