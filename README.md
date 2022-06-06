@@ -5,7 +5,9 @@
 [![](https://img.shields.io/docker/pulls/stevenweathers/wakita-retro-tool.svg)](https://hub.docker.com/r/stevenweathers/wakita-retro-tool)
 [![](https://goreportcard.com/badge/github.com/stevenweathers/wakita-retro-tool)](https://goreportcard.com/report/github.com/stevenweathers/wakita-retro-tool)
 
-# Wakita Sprint Retrospective Tool
+# Wakita is no longer actively developed, please check out [Thunderdome](https://github.com/StevenWeathers/thunderdome-planning-poker)
+
+## Wakita Sprint Retrospective Tool
 
 Wakita is an open source agile sprint retrospective tool to make sprint retro's more collaborative in the remote work era.
 
@@ -13,7 +15,7 @@ Wakita is an open source agile sprint retrospective tool to make sprint retro's 
 
 ![image](https://user-images.githubusercontent.com/846933/120089604-0b461080-c0ca-11eb-9931-6569b44d8dbc.png)
 
-# Running in production
+## Running in production
 
 ## Use latest docker image
 
@@ -25,7 +27,7 @@ docker pull stevenweathers/wakita-retro-tool
 
 [![](https://img.shields.io/github/v/release/stevenweathers/wakita-retro-tool?include_prereleases)](https://github.com/StevenWeathers/wakita-retro-tool/releases/latest)
 
-# Configuration
+## Configuration
 Wakita may be configured through environment variables or via a yaml file `config.yaml`
 located in one of:
 
